@@ -4,8 +4,8 @@
   "description": "A modern, transparent file manager for Linux with glassmorphism UI and XDG Desktop Portal integration",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "EZFM_DEVTOOLS=1 electron . --enable-logging",
+    "start": "./scripts/run-electron.sh",
+    "dev": "EZFM_DEVTOOLS=1 ./scripts/run-electron.sh --enable-logging",
     "portal": "node portal-service.js"
   },
   "repository": {
