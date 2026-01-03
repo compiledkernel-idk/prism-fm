@@ -2908,6 +2908,15 @@ function renderSettingsMenu() {
       renderFiles();
     }),
   );
+
+  settingsMenu.appendChild(createSep());
+
+  settingsMenu.appendChild(createHeader("Navigation"));
+  settingsMenu.appendChild(
+    createOption("Open via System Dialog...", false, () => {
+      openLocationViaSystemPicker();
+    }),
+  );
 }
 
 function updateUI() {
