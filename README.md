@@ -21,7 +21,24 @@ cd prism-fm
 ./install.sh
 ```
 
-**Dependencies:** Node.js >= 18.0.0, npm, Electron.
+### Dependencies
+
+**Arch Linux:**
+```bash
+sudo pacman -S nodejs npm electron
+```
+
+**Debian / Ubuntu:**
+```bash
+sudo apt install nodejs npm
+sudo npm install -g electron
+```
+
+**Fedora:**
+```bash
+sudo dnf install nodejs npm
+sudo npm install -g electron
+```
 
 ## Usage
 
