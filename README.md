@@ -117,7 +117,7 @@ windowrulev2 = size 1000 700, title:^(Open File|Save File|Select Folder)$
 ```
 ez-fm/
 ├── main.js           # Electron main process
-├── renderer.js       # UI logic
+├── renderer/         # UI logic (split)
 ├── preload.js        # IPC bridge
 ├── portal-service.js # XDG portal backend
 ├── index.html        # UI markup

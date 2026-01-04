@@ -3,10 +3,6 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta
-            http-equiv="Content-Security-Policy"
-            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
-        />
         <title>EZ File Manager</title>
         <link rel="stylesheet" href="styles.css" />
         <script src="picker-early.js"></script>
@@ -190,18 +186,36 @@
                         </div>
                     </div>
                 </div>
+                <div class="sidebar-resizer" id="sidebar-resizer" aria-hidden="true"></div>
 
-                <div class="file-list-container">
-                    <div class="file-list-header">
-                        <div></div>
-                        <div class="header-name">Name</div>
-                        <div class="header-size">Size</div>
-                        <div class="header-date">Modified</div>
-                        <div class="header-added">Added</div>
+                <div class="pane-host" id="pane-host">
+                    <div class="file-pane active" data-pane="left">
+                        <div class="file-list-container" data-pane="left">
+                            <div class="file-list-header">
+                                <div></div>
+                                <div class="header-name">Name</div>
+                                <div class="header-size">Size<span class="column-resizer" data-column="size"></span></div>
+                                <div class="header-date">Modified<span class="column-resizer" data-column="modified"></span></div>
+                                <div class="header-added">Added<span class="column-resizer" data-column="added"></span></div>
+                            </div>
+                            <div class="file-list" id="file-grid-left" data-pane="left"></div>
+                        </div>
                     </div>
-                    <div class="file-list" id="file-grid"></div>
+                    <div class="pane-divider" id="pane-divider"></div>
+                    <div class="file-pane" data-pane="right">
+                        <div class="file-list-container" data-pane="right">
+                            <div class="file-list-header">
+                                <div></div>
+                                <div class="header-name">Name</div>
+                                <div class="header-size">Size<span class="column-resizer" data-column="size"></span></div>
+                                <div class="header-date">Modified<span class="column-resizer" data-column="modified"></span></div>
+                                <div class="header-added">Added<span class="column-resizer" data-column="added"></span></div>
+                            </div>
+                            <div class="file-list" id="file-grid-right" data-pane="right"></div>
+                        </div>
+                    </div>
                 </div>
-
+                <div class="preview-resizer" id="preview-resizer" aria-hidden="true"></div>
                 <div class="preview-panel" id="preview-panel">
                     <div class="preview-header">
                         <span class="preview-title">Preview</span>
@@ -311,6 +325,21 @@
                             <line x1="3" y1="18" x2="21" y2="18"></line>
                         </svg>
                     </button>
+                    <button
+                        id="ops-btn"
+                        class="status-bar-icon-btn"
+                        title="Operations"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M12 7v5l3 3"></path>
+                        </svg>
+                    </button>
                     <span id="selected-count"></span>
                 </div>
                 <div class="status-right">
@@ -362,6 +391,55 @@
             </div>
         </div>
 
-        <script src="renderer.js"></script>
+        <div class="ops-panel" id="ops-panel">
+            <div class="ops-header">
+                <div class="ops-title">Operations</div>
+                <div class="ops-header-actions">
+                    <button class="ops-icon-btn" id="ops-pause-btn" title="Pause queue">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="6" y="5" width="4" height="14" rx="1"></rect>
+                            <rect x="14" y="5" width="4" height="14" rx="1"></rect>
+                        </svg>
+                    </button>
+                    <button class="ops-icon-btn" id="ops-clear-btn" title="Clear history">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"></path>
+                            <path d="M10 11v6"></path>
+                            <path d="M14 11v6"></path>
+                            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"></path>
+                        </svg>
+                    </button>
+                    <button class="ops-icon-btn" id="ops-close-btn" title="Close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="ops-body">
+                <div class="ops-section">
+                    <div class="ops-section-title">Queue</div>
+                    <div class="ops-list" id="ops-queue-list"></div>
+                </div>
+                <div class="ops-section">
+                    <div class="ops-section-title">History</div>
+                    <div class="ops-list" id="ops-history-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <script src="renderer/core.js"></script>
+        <script src="renderer/panes-tabs.js"></script>
+        <script src="renderer/ui-events.js"></script>
+        <script src="renderer/views-utils.js"></script>
+        <script src="renderer/views-sidebar.js"></script>
+        <script src="renderer/views-navigation.js"></script>
+        <script src="renderer/views-menus.js"></script>
+        <script src="renderer/views-render.js"></script>
+        <script src="renderer/views-actions.js"></script>
+        <script src="renderer/views-folder-sizes.js"></script>
+        <script src="renderer/views-preview.js"></script>
     </body>
 </html>

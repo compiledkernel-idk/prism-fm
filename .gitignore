@@ -5,6 +5,7 @@ node_modules/
 dist/
 out/
 build/
+src-tauri/target/
 
 # Electron build artifacts
 *.app

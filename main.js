@@ -22,6 +22,7 @@ let isDev = false;
 app.name = "ez-fm";
 
 let mainWindow;
+const cancelOperations = new Set();
 
 function logCommandFailure(command, error) {
   if (!command) return;
@@ -113,6 +114,29 @@ function resolveStartPath(args) {
     if (!arg.startsWith("-")) {
       startPath = arg;
       break;
+    }
+  }
+
+  if (!startPath) {
+    const npmArgv = process.env.npm_config_argv;
+    if (npmArgv) {
+      try {
+        const parsed = JSON.parse(npmArgv);
+        const candidates = [];
+        if (Array.isArray(parsed.remain)) candidates.push(...parsed.remain);
+        if (Array.isArray(parsed.original)) {
+          candidates.push(
+            ...parsed.original.filter((val) => val !== "run" && val !== "start"),
+          );
+        }
+        for (let i = candidates.length - 1; i >= 0; i--) {
+          const arg = String(candidates[i] || "");
+          if (arg && !arg.startsWith("-")) {
+            startPath = arg;
+            break;
+          }
+        }
+      } catch {}
     }
   }
 
@@ -609,6 +633,143 @@ ipcMain.handle("trash-item", async (event, itemPath) => {
   }
 });
 
+ipcMain.handle("restore-trash-items", async (event, originalPaths) => {
+  const list = Array.isArray(originalPaths)
+    ? originalPaths.filter(Boolean)
+    : [];
+  if (list.length === 0) {
+    return { success: false, error: "No paths provided" };
+  }
+
+  if (process.platform !== "linux") {
+    return { success: false, error: "Restore from Trash is not supported" };
+  }
+
+  const homePath = app.getPath("home");
+  const trashBase = path.join(homePath, ".local", "share", "Trash");
+  const trashFilesDir = path.join(trashBase, "files");
+  const trashInfoDir = path.join(trashBase, "info");
+
+  const normalizePath = (p) =>
+    String(p || "")
+      .replace(/\\/g, "/")
+      .replace(/\/+$/, "");
+
+  const decodePath = (value) => {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  };
+
+  let infoFiles = [];
+  try {
+    infoFiles = await fs.readdir(trashInfoDir);
+  } catch (error) {
+    return { success: false, error: "Trash info directory not found" };
+  }
+
+  const entries = [];
+  for (const fileName of infoFiles) {
+    if (!fileName.endsWith(".trashinfo")) continue;
+    const infoPath = path.join(trashInfoDir, fileName);
+    let content = "";
+    try {
+      content = await fs.readFile(infoPath, "utf8");
+    } catch {
+      continue;
+    }
+
+    let original = "";
+    let deletedAt = "";
+    for (const line of content.split(/\r?\n/)) {
+      if (line.startsWith("Path=")) {
+        original = decodePath(line.slice(5).trim());
+      } else if (line.startsWith("DeletionDate=")) {
+        deletedAt = line.slice(13).trim();
+      }
+    }
+    if (!original) continue;
+
+    const trashName = fileName.replace(/\.trashinfo$/i, "");
+    entries.push({
+      original: normalizePath(original),
+      deletedAt: deletedAt ? Date.parse(deletedAt) : 0,
+      trashName,
+      infoPath,
+    });
+  }
+
+  const entryMap = new Map();
+  for (const entry of entries) {
+    const existing = entryMap.get(entry.original);
+    if (!existing || entry.deletedAt > existing.deletedAt) {
+      entryMap.set(entry.original, entry);
+    }
+  }
+
+  const restored = [];
+  const failed = [];
+
+  for (const rawPath of list) {
+    const original = normalizePath(rawPath);
+    const entry = entryMap.get(original);
+    if (!entry) {
+      failed.push({ path: rawPath, error: "Item not found in Trash" });
+      continue;
+    }
+
+    const trashedPath = path.join(trashFilesDir, entry.trashName);
+    let stats;
+    try {
+      stats = await fs.stat(trashedPath);
+    } catch (error) {
+      failed.push({ path: rawPath, error: "Trashed item missing" });
+      continue;
+    }
+
+    let targetPath = original || rawPath;
+    try {
+      await fs.access(targetPath);
+      targetPath = await findUniquePath(
+        targetPath,
+        stats.isDirectory() ? "folder" : "file",
+      );
+    } catch {}
+
+    try {
+      await fs.mkdir(path.dirname(targetPath), { recursive: true });
+      await fs.rename(trashedPath, targetPath);
+      try {
+        await fs.unlink(entry.infoPath);
+      } catch {}
+      restored.push({ from: trashedPath, to: targetPath });
+    } catch (error) {
+      try {
+        if (stats.isDirectory()) {
+          await copyDirectory(trashedPath, targetPath);
+          await fs.rm(trashedPath, { recursive: true, force: true });
+        } else {
+          await fs.copyFile(trashedPath, targetPath);
+          await fs.unlink(trashedPath);
+        }
+        try {
+          await fs.unlink(entry.infoPath);
+        } catch {}
+        restored.push({ from: trashedPath, to: targetPath });
+      } catch (fallbackError) {
+        failed.push({
+          path: rawPath,
+          error: fallbackError.message || "Restore failed",
+        });
+      }
+    }
+  }
+
+  return { success: failed.length === 0, restored, failed };
+});
+
 ipcMain.handle("rename-item", async (event, oldPath, newName) => {
   try {
     const dirName = path.dirname(oldPath);
@@ -752,7 +913,24 @@ ipcMain.handle("move-item", async (event, sourcePath, destPath) => {
   }
 });
 
-ipcMain.handle("batch-file-operation", async (event, items, operation) => {
+ipcMain.handle("cancel-operation", async (event, operationId) => {
+  if (!operationId) return { success: false, error: "Missing operation id" };
+  cancelOperations.add(String(operationId));
+  return { success: true };
+});
+
+ipcMain.handle("batch-file-operation", async (event, items, operation, operationId) => {
+  const cancelKey = operationId ? String(operationId) : null;
+  const shouldCancel = () =>
+    Boolean(cancelKey && cancelOperations.has(cancelKey));
+  const checkCancelled = () => {
+    if (shouldCancel()) {
+      const err = new Error("Operation cancelled");
+      err.code = "CANCELLED";
+      throw err;
+    }
+  };
+
   let totalBytes = 0;
   let processedBytes = 0;
   let totalFiles = 0;
@@ -761,6 +939,7 @@ ipcMain.handle("batch-file-operation", async (event, items, operation) => {
   const itemSizes = new Map();
 
   const scan = async (p, rootItemPath) => {
+    checkCancelled();
     try {
       const stats = await fs.stat(p);
       if (stats.isDirectory()) {
@@ -789,6 +968,7 @@ ipcMain.handle("batch-file-operation", async (event, items, operation) => {
   };
 
   const copyRecursive = async (src, dest) => {
+    checkCancelled();
     const stats = await fs.stat(src);
     if (stats.isDirectory()) {
       await fs.mkdir(dest, { recursive: true });
@@ -797,6 +977,7 @@ ipcMain.handle("batch-file-operation", async (event, items, operation) => {
         await copyRecursive(path.join(src, child), path.join(dest, child));
       }
     } else {
+      checkCancelled();
       await fs.copyFile(src, dest);
       processedBytes += stats.size;
       processedFiles++;
@@ -806,10 +987,12 @@ ipcMain.handle("batch-file-operation", async (event, items, operation) => {
 
   try {
     for (const item of items) {
+      checkCancelled();
       if (operation === "copy") {
         await copyRecursive(item.source, item.dest);
       } else {
         try {
+          checkCancelled();
           await fs.rename(item.source, item.dest);
 
           const size = itemSizes.get(item.source) || 0;
@@ -823,7 +1006,14 @@ ipcMain.handle("batch-file-operation", async (event, items, operation) => {
     }
     return { success: true };
   } catch (error) {
+    if (error?.code === "CANCELLED") {
+      return { success: false, cancelled: true, error: "Cancelled" };
+    }
     return { success: false, error: error.message };
+  } finally {
+    if (cancelKey) {
+      cancelOperations.delete(cancelKey);
+    }
   }
 });
 

@@ -20,6 +20,7 @@ const fileManagerApi = {
   deleteItem: invoke("delete-item"),
   deleteItemSudo: invoke("delete-item-sudo"),
   trashItem: invoke("trash-item"),
+  restoreTrashItems: invoke("restore-trash-items"),
   renameItem: invoke("rename-item"),
   createFolder: invoke("create-folder"),
   createFile: invoke("create-file"),
@@ -34,6 +35,7 @@ const fileManagerApi = {
   compressItems: invoke("compress-items"),
 
   batchFileOperation: invoke("batch-file-operation"),
+  cancelOperation: invoke("cancel-operation"),
   onFileOperationProgress: (callback) =>
     ipcRenderer.on("file-operation-progress", (event, percent) => callback(percent)),
 

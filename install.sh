@@ -31,6 +31,14 @@ need_cmd() {
   fi
 }
 
+require_non_root() {
+  if [ "$EUID" -eq 0 ]; then
+    echo -e "${RED}✗ Do not run this installer with sudo${NC}"
+    echo "makepkg must be run as a normal user."
+    exit 1
+  fi
+}
+
 resolve_bins() {
   NODE_BIN="$(command -v node || true)"
   ELECTRON_BIN="$(command -v electron || true)"
@@ -89,6 +97,7 @@ check_hyprland() {
 
 install_file_manager() {
   echo -e "${BLUE}→ Installing file manager...${NC}"
+  require_non_root
   need_cmd git
   need_cmd makepkg
   need_cmd sudo
@@ -115,6 +124,7 @@ install_file_manager() {
     exit 1
   fi
 
+  echo "Running makepkg in $BUILD_DIR/packaging/aur"
   (cd "$BUILD_DIR/packaging/aur" && makepkg -si)
   echo -e "${GREEN}✓ File manager installed${NC}"
 }
