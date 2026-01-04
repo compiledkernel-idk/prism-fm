@@ -1,4 +1,4 @@
-let saveCacheTimeout;
+
 
 function saveFolderSizeCache() {
   clearTimeout(saveCacheTimeout);
@@ -7,7 +7,7 @@ function saveFolderSizeCache() {
       trimCache(folderSizeCache, MAX_FOLDER_SIZE_CACHE_ENTRIES);
       const obj = Object.fromEntries(folderSizeCache);
       localStorage.setItem("folderSizeCache", JSON.stringify(obj));
-    } catch {}
+    } catch { }
   }, 2000);
 }
 

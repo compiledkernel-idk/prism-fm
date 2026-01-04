@@ -80,7 +80,15 @@ function waitForFileManager(timeoutMs = 8000) {
 async function resolveStartupContext() {
   const params = new URLSearchParams(window.location.search);
   const startPathArg = params.get("startPath");
-  const resolvedHome = await window.fileManager.getHomeDirectory();
+
+  let resolvedHome = "";
+  try {
+    resolvedHome = await window.fileManager.getHomeDirectory();
+  } catch (e) {
+    console.error("Failed to get home directory:", e);
+    resolvedHome = "/home";
+  }
+
   if (!homeDirectory) homeDirectory = resolvedHome;
   startupPathArg = startPathArg || "";
   currentPath = startPathArg || resolvedHome;
@@ -122,7 +130,7 @@ function applyPickerStartupCache(cache) {
   if (!cache || startupPathArg) return false;
   currentPath = cache.path;
   currentItems = cache.items || [];
-  history = [currentPath];
+  appHistory = [currentPath];
   historyIndex = 0;
   selectedItems.clear();
 
@@ -149,7 +157,7 @@ function applyStartupCache(cache) {
   if (!cache || startupPathArg) return false;
   currentPath = homeDirectory || cache.path;
   currentItems = cache.items || [];
-  history = [currentPath];
+  appHistory = [currentPath];
   historyIndex = 0;
   selectedItems.clear();
 
@@ -200,7 +208,7 @@ function createPaneState(id, listEl) {
     path: "",
     items: [],
     selectedItems: new Set(),
-    history: [],
+    appHistory: [],
     historyIndex: -1,
     scrollTop: 0,
     isArchive: false,
@@ -226,7 +234,7 @@ function syncActivePaneState() {
   if (!pane) return;
   pane.path = currentPath;
   pane.items = currentItems;
-  pane.history = history;
+  pane.appHistory = appHistory;
   pane.historyIndex = historyIndex;
   pane.selectedItems = selectedItems;
   pane.scrollTop = fileList ? fileList.scrollTop : 0;
@@ -237,7 +245,7 @@ function snapshotPaneState(pane) {
   const scrollTop = pane.fileListEl ? pane.fileListEl.scrollTop : pane.scrollTop;
   return {
     path: pane.path || "",
-    history: Array.isArray(pane.history) ? [...pane.history] : [],
+    appHistory: Array.isArray(pane.appHistory) ? [...pane.appHistory] : [],
     historyIndex: typeof pane.historyIndex === "number" ? pane.historyIndex : -1,
     selectedItems: new Set(pane.selectedItems || []),
     scrollTop: scrollTop || 0,
@@ -251,7 +259,7 @@ function applyPaneSnapshot(pane, snapshot) {
     pane.path = "";
     pane.items = [];
     pane.selectedItems = new Set();
-    pane.history = [];
+    pane.appHistory = [];
     pane.historyIndex = -1;
     pane.scrollTop = 0;
     pane.isArchive = false;
@@ -260,16 +268,16 @@ function applyPaneSnapshot(pane, snapshot) {
 
   pane.path = snapshot.path || "";
   pane.items = [];
-  pane.history = Array.isArray(snapshot.history)
-    ? [...snapshot.history]
+  pane.appHistory = Array.isArray(snapshot.appHistory)
+    ? [...snapshot.appHistory]
     : pane.path
       ? [pane.path]
       : [];
   pane.historyIndex =
     typeof snapshot.historyIndex === "number"
       ? snapshot.historyIndex
-      : pane.history.length
-        ? pane.history.length - 1
+      : pane.appHistory.length
+        ? pane.appHistory.length - 1
         : -1;
   pane.selectedItems = snapshot.selectedItems
     ? new Set(snapshot.selectedItems)
@@ -286,7 +294,7 @@ function normalizeTabState(tab) {
     tab.panes = {
       left: {
         path: basePath,
-        history: tab.history ? [...tab.history] : basePath ? [basePath] : [],
+        appHistory: tab.appHistory ? [...tab.appHistory] : basePath ? [basePath] : [],
         historyIndex:
           typeof tab.historyIndex === "number" ? tab.historyIndex : 0,
         selectedItems: new Set(tab.selectedItems || []),
@@ -295,7 +303,7 @@ function normalizeTabState(tab) {
       },
       right: {
         path: "",
-        history: [],
+        appHistory: [],
         historyIndex: -1,
         selectedItems: new Set(),
         scrollTop: 0,
@@ -319,8 +327,8 @@ function getTabPrimaryPath(tab) {
   const targetId = tab.activePaneId || "left";
   const panePath =
     tab.panes &&
-    tab.panes[targetId] &&
-    typeof tab.panes[targetId].path === "string"
+      tab.panes[targetId] &&
+      typeof tab.panes[targetId].path === "string"
       ? tab.panes[targetId].path
       : "";
   if (panePath) return panePath;
@@ -363,11 +371,11 @@ function setActivePane(id, options = {}) {
   fileList = pane.fileListEl;
   currentPath = pane.path || currentPath;
   currentItems = pane.items || [];
-  if (!pane.history || pane.history.length === 0) {
-    pane.history = pane.path ? [pane.path] : [];
-    pane.historyIndex = pane.history.length ? 0 : -1;
+  if (!pane.appHistory || pane.appHistory.length === 0) {
+    pane.appHistory = pane.path ? [pane.path] : [];
+    pane.historyIndex = pane.appHistory.length ? 0 : -1;
   }
-  history = pane.history;
+  appHistory = pane.appHistory;
   historyIndex = pane.historyIndex ?? -1;
   selectedItems = pane.selectedItems || new Set();
   pane.selectedItems = selectedItems;
@@ -383,7 +391,7 @@ function setActivePane(id, options = {}) {
     isInTrash =
       Boolean(commonDirs && commonDirs.trash) &&
       normalizePathForCompare(currentPath) ===
-        normalizePathForCompare(commonDirs.trash);
+      normalizePathForCompare(commonDirs.trash);
     updateToolbarForTrash();
     syncQuickAccessHighlight();
     syncTagsHighlight();
@@ -419,7 +427,7 @@ function renderPane(pane) {
     currentItems,
     selectedItems,
     currentPath,
-    history,
+    appHistory,
     historyIndex,
     sortBy,
     sortAscending,
@@ -457,7 +465,7 @@ function renderPane(pane) {
   currentItems = prev.currentItems;
   selectedItems = prev.selectedItems;
   currentPath = prev.currentPath;
-  history = prev.history;
+  appHistory = prev.appHistory;
   historyIndex = prev.historyIndex;
   sortBy = prev.sortBy;
   sortAscending = prev.sortAscending;
@@ -479,7 +487,7 @@ async function ensurePaneLoaded(paneId, fallbackPath) {
 
   if (!pane.path) {
     pane.path = fallbackPath || (await window.fileManager.getHomeDirectory());
-    pane.history = [pane.path];
+    pane.appHistory = [pane.path];
     pane.historyIndex = 0;
   }
 
@@ -502,7 +510,7 @@ async function ensurePaneLoaded(paneId, fallbackPath) {
         currentPath = pane.path;
         currentItems = pane.items;
         selectedItems = pane.selectedItems;
-        history = pane.history;
+        appHistory = pane.appHistory;
         historyIndex = pane.historyIndex;
         updateUI();
         updateStatusBar();
@@ -532,10 +540,10 @@ function setSplitViewEnabled(enabled, options = {}) {
       if (!options.keepRightPane) {
         try {
           targetPath = await window.fileManager.getHomeDirectory();
-        } catch {}
+        } catch { }
         panes.right.path = targetPath || "";
-        panes.right.history = targetPath ? [targetPath] : [];
-        panes.right.historyIndex = panes.right.history.length ? 0 : -1;
+        panes.right.appHistory = targetPath ? [targetPath] : [];
+        panes.right.historyIndex = panes.right.appHistory.length ? 0 : -1;
         panes.right.selectedItems = new Set();
         panes.right.scrollTop = 0;
         panes.right.isArchive = false;
@@ -556,7 +564,7 @@ function setSplitViewEnabled(enabled, options = {}) {
   if (options.persist !== false) {
     try {
       localStorage.setItem("splitViewEnabled", String(splitViewEnabled));
-    } catch {}
+    } catch { }
   }
 }
 
@@ -565,10 +573,10 @@ function setupPanes() {
   panes.right = createPaneState("right", fileListRight);
 
   panes.left.path = currentPath;
-  panes.left.history = [currentPath];
+  panes.left.appHistory = [currentPath];
   panes.left.historyIndex = 0;
   selectedItems = panes.left.selectedItems;
-  history = panes.left.history;
+  appHistory = panes.left.appHistory;
   historyIndex = panes.left.historyIndex;
   fileList = panes.left.fileListEl;
 
@@ -616,13 +624,48 @@ async function bootstrapFullApp() {
   loadQuickAccessItems();
   renderPinnedItems();
   loadFullPreferences();
+
   const commonDirsPromise = window.fileManager.getCommonDirectories();
+
+  if (!currentPath) {
+    try {
+      const dirs = await commonDirsPromise;
+      if (dirs && dirs.home) {
+        currentPath = dirs.home;
+        homeDirectory = dirs.home;
+        commonDirs = dirs;
+      }
+    } catch (e) {
+      console.error("Failed to get home directory for startup", e);
+    }
+  }
+
+  // If still empty, fall back to root or simple dot (though home should have worked)
+  if (!currentPath) currentPath = "/";
+
+  // Trigger navigation but allow UI to unblock slightly faster if needed,
+  // though awaiting is safer to prevent empty state flicker.
   await navigateTo(currentPath);
+
   document.documentElement.classList.remove("app-loading");
-  commonDirs = await commonDirsPromise;
+
+  // If we didn't await commonDirs above, do it now
+  if (!commonDirs || Object.keys(commonDirs).length === 0) {
+    try {
+      commonDirs = await commonDirsPromise;
+    } catch { }
+  }
+
   hasRealTrashFolder = Boolean(commonDirs && commonDirs.trash);
+
+  // Ensure homeDirectory is set if it wasn't
+  if (!homeDirectory && commonDirs && commonDirs.home) {
+    homeDirectory = commonDirs.home;
+  }
+
   renderPinnedItems();
   syncQuickAccessHighlight();
+
   scheduleIdle(() => {
     renderDisks();
   });
@@ -789,7 +832,7 @@ function initPickerMode(mode, multiple, defaultFilename) {
       hiddenToggleBtn.classList.toggle("active", showHidden);
       try {
         localStorage.setItem("showHidden", String(showHidden));
-      } catch {}
+      } catch { }
       renderFiles();
     });
   }
@@ -852,8 +895,8 @@ function initPickerMode(mode, multiple, defaultFilename) {
         label.textContent =
           selectedItems.size > 0
             ? Array.from(selectedItems)
-                .map((p) => p.split(/[/\\]/).pop())
-                .join(", ")
+              .map((p) => p.split(/[/\\]/).pop())
+              .join(", ")
             : currentPath;
       }
     }
@@ -911,7 +954,7 @@ async function createNewTab(path) {
   const startPath = path || (await window.fileManager.getHomeDirectory());
   const leftSnapshot = snapshotPaneState(panes.left);
   leftSnapshot.path = startPath;
-  leftSnapshot.history = [startPath];
+  leftSnapshot.appHistory = [startPath];
   leftSnapshot.historyIndex = 0;
   leftSnapshot.selectedItems = new Set();
   leftSnapshot.scrollTop = 0;
@@ -920,8 +963,8 @@ async function createNewTab(path) {
   const rightSnapshot = snapshotPaneState(panes.right);
   const rightPath = startPath;
   rightSnapshot.path = rightPath;
-  rightSnapshot.history = rightPath ? [rightPath] : [];
-  rightSnapshot.historyIndex = rightSnapshot.history.length ? 0 : -1;
+  rightSnapshot.appHistory = rightPath ? [rightPath] : [];
+  rightSnapshot.historyIndex = rightSnapshot.appHistory.length ? 0 : -1;
   rightSnapshot.selectedItems = new Set();
   rightSnapshot.scrollTop = 0;
   rightSnapshot.isArchive = false;

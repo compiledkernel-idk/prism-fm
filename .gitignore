@@ -40,8 +40,9 @@ Thumbs.db
 .env.*.local
 
 # AI assistant artifacts
+# Try not to use AI
 .aider*
-.claude/
+.claude/ 
 
 # Temporary files
 *.tmp

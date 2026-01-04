@@ -1,16 +1,16 @@
 {
-  "name": "ez-fm",
+  "name": "prism-fm",
   "version": "1.0.0",
-  "description": "A modern, transparent file manager for Linux with glassmorphism UI and XDG Desktop Portal integration",
+  "description": "A modern, transparent file manager for Linux with glassmorphism UI",
   "main": "main.js",
   "scripts": {
     "start": "./scripts/run-electron.sh",
-    "dev": "EZFM_DEVTOOLS=1 ./scripts/run-electron.sh --enable-logging",
+    "dev": "PRISM_DEVTOOLS=1 ./scripts/run-electron.sh --enable-logging",
     "portal": "node portal-service.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/TechyTechster/ez-fm.git"
+    "url": "https://github.com/compiledkernel-idk/prism-fm.git"
   },
   "keywords": [
     "file-manager",
@@ -24,11 +24,11 @@
     "file-picker"
   ],
   "author": "tomiwaf",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/TechyTechster/ez-fm/issues"
+    "url": "https://github.com/compiledkernel-idk/prism-fm/issues"
   },
-  "homepage": "https://github.com/TechyTechster/ez-fm#readme",
+  "homepage": "https://github.com/compiledkernel-idk/prism-fm#readme",
   "engines": {
     "node": ">=18.0.0"
   },

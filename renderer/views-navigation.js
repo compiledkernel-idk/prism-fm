@@ -19,7 +19,7 @@ async function navigateTo(path) {
           }
           items.push(info);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     currentItems = items;
@@ -63,7 +63,7 @@ async function navigateTo(path) {
         normalizeTabState(tab);
         if (tab.panes?.[activePaneId]) {
           tab.panes[activePaneId].path = currentPath;
-          tab.panes[activePaneId].history = [...history];
+          tab.panes[activePaneId].appHistory = [...appHistory];
           tab.panes[activePaneId].historyIndex = historyIndex;
           tab.panes[activePaneId].selectedItems = new Set(selectedItems);
           tab.panes[activePaneId].scrollTop = fileList ? fileList.scrollTop : 0;
@@ -89,7 +89,7 @@ async function navigateTo(path) {
       isInTrash =
         Boolean(commonDirs && commonDirs.trash) &&
         normalizePathForCompare(currentPath) ===
-          normalizePathForCompare(commonDirs.trash);
+        normalizePathForCompare(commonDirs.trash);
       updateToolbarForTrash();
       syncQuickAccessHighlight();
       scheduleVisibleFolderSizes();
@@ -101,8 +101,7 @@ async function navigateTo(path) {
   }
 }
 
-const STARTUP_CACHE_KEY = "startupCacheHome";
-const STARTUP_CACHE_MAX_ITEMS = 300;
+
 
 function saveStartupCache(path, items) {
   if (!path || !Array.isArray(items)) return;
@@ -131,7 +130,7 @@ function saveStartupCache(path, items) {
       STARTUP_CACHE_KEY,
       JSON.stringify({ path, items: trimmed, ts: Date.now() }),
     );
-  } catch {}
+  } catch { }
 }
 
 window.activateTab = activateTab;
@@ -152,14 +151,14 @@ function finishNavigation() {
   renderedItemCount = 0;
   isLoadingMore = false;
 
-  if (historyIndex === -1 || history[historyIndex] !== currentPath) {
-    history = history.slice(0, historyIndex + 1);
-    history.push(currentPath);
-    historyIndex = history.length - 1;
+  if (historyIndex === -1 || appHistory[historyIndex] !== currentPath) {
+    appHistory = appHistory.slice(0, historyIndex + 1);
+    appHistory.push(currentPath);
+    historyIndex = appHistory.length - 1;
 
-    if (history.length > MAX_HISTORY_LENGTH) {
-      const overflow = history.length - MAX_HISTORY_LENGTH;
-      history = history.slice(overflow);
+    if (appHistory.length > MAX_HISTORY_LENGTH) {
+      const overflow = appHistory.length - MAX_HISTORY_LENGTH;
+      appHistory = appHistory.slice(overflow);
       historyIndex -= overflow;
     }
   }
@@ -174,7 +173,7 @@ function finishNavigation() {
   updateStatusBar();
 
   if (panes[activePaneId]) {
-    panes[activePaneId].history = history;
+    panes[activePaneId].appHistory = appHistory;
     panes[activePaneId].historyIndex = historyIndex;
     panes[activePaneId].selectedItems = selectedItems;
   }
@@ -269,5 +268,5 @@ function saveCurrentViewSettings() {
       "folderViewSettings",
       JSON.stringify(viewSettingsCache),
     );
-  } catch {}
+  } catch { }
 }

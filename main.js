@@ -16,10 +16,16 @@ const fsSync = require("fs");
 const sizeOf = require("image-size");
 const { fileURLToPath } = require("url");
 
+
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('enable-zero-copy');
+app.commandLine.appendSwitch('ignore-gpu-blocklist');
+app.commandLine.appendSwitch('enable-accelerated-video-decode');
+
 let isPicker = false;
 let isDev = false;
 
-app.name = "ez-fm";
+app.name = "prism-fm";
 
 let mainWindow;
 const cancelOperations = new Set();
@@ -49,7 +55,7 @@ function getUserArgs() {
   return process.argv.filter((arg, idx) => {
     if (idx === 0) return false;
     if (arg === appPath || arg === exePath) return false;
-  return true;
+    return true;
   });
 }
 
@@ -97,7 +103,7 @@ async function collectWalThemes() {
           alpha: data.alpha,
           wallpaper: data.wallpaper,
         });
-      } catch {}
+      } catch { }
     }
   };
 
@@ -136,7 +142,7 @@ function resolveStartPath(args) {
             break;
           }
         }
-      } catch {}
+      } catch { }
     }
   }
 
@@ -245,7 +251,7 @@ function createWindow() {
       };
       mainWindow.setTitle(titles[pickerOptions.pickerMode] || "File Picker");
     } else {
-      mainWindow.setTitle("EZ File Manager");
+      mainWindow.setTitle("Prism FM");
     }
   });
 
@@ -273,7 +279,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  isDev = process.env.EZFM_DEVTOOLS === "1";
+  isDev = process.env.PRISM_DEVTOOLS === "1";
   createWindow();
 
   if (isDev) {
@@ -344,7 +350,7 @@ ipcMain.handle("get-directory-contents", async (event, dirPath) => {
           if (item.isSymbolicLink()) {
             linkTarget = await fs.readlink(fullPath);
           }
-        } catch (err) {}
+        } catch (err) { }
 
         return {
           name: item.name,
@@ -397,7 +403,7 @@ ipcMain.handle("get-common-directories", () => {
     if (!p) return null;
     try {
       if (fsSync.existsSync(p) && fsSync.statSync(p).isDirectory()) return p;
-    } catch {}
+    } catch { }
     return null;
   };
 
@@ -512,7 +518,28 @@ ipcMain.handle("parse-path", (event, pathString) => {
 
 ipcMain.handle("open-file", async (event, filePath) => {
   try {
-    await shell.openPath(filePath);
+    const { spawn } = require("child_process");
+
+
+    if (process.platform === "win32") {
+      spawn("cmd", ["/c", "start", "", filePath], {
+        detached: true,
+        stdio: "ignore",
+        shell: true
+      }).unref();
+    } else if (process.platform === "darwin") {
+      spawn("open", [filePath], {
+        detached: true,
+        stdio: "ignore"
+      }).unref();
+    } else {
+
+      spawn("xdg-open", [filePath], {
+        detached: true,
+        stdio: "ignore"
+      }).unref();
+    }
+
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -736,14 +763,14 @@ ipcMain.handle("restore-trash-items", async (event, originalPaths) => {
         targetPath,
         stats.isDirectory() ? "folder" : "file",
       );
-    } catch {}
+    } catch { }
 
     try {
       await fs.mkdir(path.dirname(targetPath), { recursive: true });
       await fs.rename(trashedPath, targetPath);
       try {
         await fs.unlink(entry.infoPath);
-      } catch {}
+      } catch { }
       restored.push({ from: trashedPath, to: targetPath });
     } catch (error) {
       try {
@@ -756,7 +783,7 @@ ipcMain.handle("restore-trash-items", async (event, originalPaths) => {
         }
         try {
           await fs.unlink(entry.infoPath);
-        } catch {}
+        } catch { }
         restored.push({ from: trashedPath, to: targetPath });
       } catch (fallbackError) {
         failed.push({
@@ -953,7 +980,7 @@ ipcMain.handle("batch-file-operation", async (event, items, operation, operation
           (itemSizes.get(rootItemPath) || 0) + stats.size,
         );
       }
-    } catch {}
+    } catch { }
   };
 
   for (const item of items) {
@@ -1058,9 +1085,9 @@ async function getDirectorySize(dirPath) {
           const stats = await fs.stat(fullPath);
           size += stats.size;
         }
-      } catch (err) {}
+      } catch (err) { }
     }
-  } catch (err) {}
+  } catch (err) { }
   return size;
 }
 
@@ -1078,7 +1105,7 @@ ipcMain.handle("clipboard-copy-paths", async (event, paths) => {
 
         "text/uri-list": list.map(toFileUrl).join("\n"),
       });
-    } catch {}
+    } catch { }
 
     return { success: true };
   } catch (error) {
@@ -1330,7 +1357,7 @@ async function getDiskSpace(pathStr) {
         free: stats.bavail * stats.bsize,
       };
     }
-  } catch {}
+  } catch { }
 
   const { exec } = require("child_process");
   const util = require("util");
@@ -1379,7 +1406,7 @@ ipcMain.handle("get-drives", async () => {
         await fs.access(drive);
         const space = await getDiskSpace(drive);
         drives.push({ name: drive, path: drive, mounted: true, space });
-      } catch (err) {}
+      } catch (err) { }
     }
     return drives;
   } else {
@@ -1483,7 +1510,7 @@ ipcMain.handle("get-drives", async () => {
                     }
                   }
                 }
-              } catch (e) {}
+              } catch (e) { }
             } else if (!drives.some((d) => d.path === itemPath)) {
               drives.push({
                 name: item.name,
@@ -1493,7 +1520,7 @@ ipcMain.handle("get-drives", async () => {
             }
           }
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     for (const d of drives) {
@@ -1759,7 +1786,7 @@ ipcMain.handle("get-image-metadata", async (event, filePath) => {
 
     try {
       dimensions = sizeOf(filePath);
-    } catch (e) {}
+    } catch (e) { }
 
     return {
       success: true,
@@ -1784,8 +1811,20 @@ ipcMain.handle("get-video-metadata", async (event, filePath) => {
     const util = require("util");
     const execPromise = util.promisify(exec);
 
+
+    const MAX_SIZE_FOR_FFPROBE = 500 * 1024 * 1024; // 500MB
+    if (stats.size > MAX_SIZE_FOR_FFPROBE) {
+      return {
+        success: true,
+        metadata: {
+          fileSize: stats.size,
+          note: "File too large for metadata extraction",
+        },
+      };
+    }
+
     try {
-      const cmd = `ffprobe -v quiet -print_format json -show_format -show_streams "${filePath}" 2>/dev/null`;
+      const cmd = `timeout 5 ffprobe -v quiet -print_format json -show_format -show_streams "${filePath}" 2>/dev/null`;
       const { stdout } = await execPromise(cmd);
       const data = JSON.parse(stdout);
 
@@ -1804,12 +1843,12 @@ ipcMain.handle("get-video-metadata", async (event, filePath) => {
           videoHeight: videoStream?.height || null,
           videoFps: videoStream?.r_frame_rate
             ? (() => {
-                const parts = videoStream.r_frame_rate.split("/");
-                if (parts.length === 2) {
-                  return parseFloat(parts[0]) / parseFloat(parts[1]);
-                }
-                return parseFloat(videoStream.r_frame_rate);
-              })()
+              const parts = videoStream.r_frame_rate.split("/");
+              if (parts.length === 2) {
+                return parseFloat(parts[0]) / parseFloat(parts[1]);
+              }
+              return parseFloat(videoStream.r_frame_rate);
+            })()
             : null,
           audioCodec: audioStream?.codec_name || null,
           audioChannels: audioStream?.channels || null,
@@ -1829,6 +1868,25 @@ ipcMain.handle("get-video-metadata", async (event, filePath) => {
         },
       };
     }
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+
+ipcMain.handle("get-file-type", async (event, filePath) => {
+  try {
+    const { exec } = require("child_process");
+    const util = require("util");
+    const execPromise = util.promisify(exec);
+
+    const cmd = `file -b "${filePath.replace(/"/g, '\\"')}"`;
+    const { stdout } = await execPromise(cmd);
+
+    return {
+      success: true,
+      fileType: stdout.trim()
+    };
   } catch (error) {
     return { success: false, error: error.message };
   }

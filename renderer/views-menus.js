@@ -1,4 +1,4 @@
-let activeMenuType = null;
+
 
 function toggleViewMenu(type, btn) {
   if (!viewMenu) return;
@@ -47,10 +47,9 @@ function renderViewMenu(type) {
     div.className = `context-menu-item`;
     div.innerHTML = `
       <span style="flex:1">${escapeHtml(label)}</span>
-      ${
-        isActive
-          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-hover)"><polyline points="20 6 9 17 4 12"/></svg>`
-          : `<div style="width:16px"></div>`
+      ${isActive
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-hover)"><polyline points="20 6 9 17 4 12"/></svg>`
+        : `<div style="width:16px"></div>`
       }
     `;
     div.addEventListener("click", (e) => {
@@ -191,7 +190,7 @@ function renderViewMenu(type) {
         updateThumbnailSizeCSS();
         try {
           localStorage.setItem("thumbnailSize", thumbnailSize);
-        } catch {}
+        } catch { }
       });
       viewMenu.appendChild(div);
     }
@@ -301,10 +300,9 @@ function renderSettingsMenu() {
     div.className = `context-menu-item`;
     div.innerHTML = `
       <span style="flex:1">${escapeHtml(label)}</span>
-      ${
-        isActive
-          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-hover)"><polyline points="20 6 9 17 4 12"/></svg>`
-          : `<div style="width:16px"></div>`
+      ${isActive
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-hover)"><polyline points="20 6 9 17 4 12"/></svg>`
+        : `<div style="width:16px"></div>`
       }
     `;
     div.addEventListener("click", (e) => {
@@ -346,7 +344,7 @@ function renderSettingsMenu() {
       showPreviewPane = !showPreviewPane;
       try {
         localStorage.setItem("showPreviewPane", String(showPreviewPane));
-      } catch {}
+      } catch { }
       updatePreviewPanelVisibility();
     }),
   );
@@ -355,7 +353,7 @@ function renderSettingsMenu() {
       showHidden = !showHidden;
       try {
         localStorage.setItem("showHidden", String(showHidden));
-      } catch {}
+      } catch { }
       renderCurrentView();
       updateStatusBar();
     }),
@@ -452,24 +450,7 @@ function renderMenuItems(container, items) {
   }
 }
 
-const CONTEXT_MENU_ICONS = {
-  paste: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>`,
-  folder: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>`,
-  file: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>`,
-  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
-  open: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>`,
-  copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`,
-  cut: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>`,
-  undo: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 00-4-4H4"/></svg>`,
-  rename: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
-  pin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4l6 6-3 3v5l-2 2-2-2v-5l-3-3 4-6z"/><path d="M5 21l7-7"/></svg>`,
-  unpin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4l6 6-3 3v5l-2 2-2-2v-5l-3-3 4-6z"/><path d="M5 21l7-7"/><path d="M3 3l18 18"/></svg>`,
-  moveUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>`,
-  moveDown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>`,
-  terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
-  extract: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21,8 21,21 3,21 3,8"/><rect x="1" y="3" width="22" height="5"/><path d="M12 11v6"/><path d="M9 14l3 3 3-3"/></svg>`,
-  compress: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21,8 21,21 3,21 3,8"/><rect x="1" y="3" width="22" height="5"/><path d="M12 17v-6"/><path d="M9 14l3-3 3 3"/></svg>`,
-};
+
 
 function createTagsRow(targetPath) {
   const currentTags = fileTags[targetPath] || [];
@@ -565,7 +546,7 @@ function buildBackgroundMenuItems() {
             "Pin folder",
             "Label:",
             contextPinTargetPath.split(/[/\\]/).filter(Boolean).pop() ||
-              contextPinTargetPath,
+            contextPinTargetPath,
             "Pin",
           );
           if (label === null) return;
@@ -596,6 +577,19 @@ function buildQuickAccessMenuItems() {
         quickAccessItems.findIndex((x) => x.id === qaId) >=
         quickAccessItems.length - 1,
       onClick: () => moveQuickAccess(qaId, +1),
+    },
+    { type: "separator" },
+    {
+      label: "Rename",
+      icon: CONTEXT_MENU_ICONS.rename,
+      onClick: () => {
+        // Renaming a quick access item only renames the label, not the target? 
+        // Or if it's "renaming files", maybe the user expects to rename the TARGET folder?
+        // Let's assume renaming the LABEL for now as regular renameSelected requires selection in file list.
+        // Actually, let's implement a specific Rename for quick access if possible.
+        // But for now, let's just use the pin label rename logic.
+        renameQuickAccess(qaId);
+      },
     },
     { type: "separator" },
     {
@@ -630,6 +624,11 @@ function buildItemMenuItems() {
       icon: CONTEXT_MENU_ICONS.paste,
       disabled: !(clipboardItems && clipboardItems.length > 0),
       onClick: () => paste(),
+    },
+    {
+      label: "Rename",
+      icon: CONTEXT_MENU_ICONS.rename,
+      onClick: () => renameSelected(),
     },
     { type: "separator" },
   ];
@@ -721,11 +720,7 @@ function buildItemMenuItems() {
     itemMenu.push({ type: "separator" });
   }
 
-  itemMenu.push({
-    label: "Rename",
-    icon: CONTEXT_MENU_ICONS.rename,
-    onClick: () => renameSelected(),
-  });
+
   itemMenu.push({
     label: "Delete",
     icon: CONTEXT_MENU_ICONS.trash,
@@ -769,9 +764,7 @@ function renderContextMenu() {
   renderMenuItems(contextMenuPanel, buildItemMenuItems());
 }
 
-let progressInterval = null;
-let realProgress = 0;
-let fakeProgress = 0;
+
 
 function startProgress() {
   if (progressInterval) clearInterval(progressInterval);

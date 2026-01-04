@@ -1,445 +1,308 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>EZ File Manager</title>
-        <link rel="stylesheet" href="styles.css" />
-        <script src="picker-early.js"></script>
-        <style>
-            /* Hide everything until ready in picker mode */
-            .picker-mode-early body {
-                visibility: hidden;
-            }
-            .picker-mode-early.picker-ready body {
-                visibility: visible;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="app-container">
-            <div class="tab-bar" id="tab-bar"></div>
 
-            <div class="toolbar">
-                <div class="nav-buttons">
-                    <button
-                        class="nav-btn sidebar-toggle"
-                        id="sidebar-toggle-btn"
-                        title="Toggle Sidebar"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path d="M3 12h18M3 6h18M3 18h18" />
-                        </svg>
-                    </button>
-                    <button class="nav-btn" id="back-btn" title="Back">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path d="M15 18l-6-6 6-6" />
-                        </svg>
-                    </button>
-                    <button class="nav-btn" id="forward-btn" title="Forward">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path d="M9 18l6-6-6-6" />
-                        </svg>
-                    </button>
-                    <button class="nav-btn" id="up-btn" title="Up">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path d="M18 15l-6-6-6 6" />
-                        </svg>
-                    </button>
-                    <button class="nav-btn" id="refresh-btn" title="Refresh">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path d="M23 4v6h-6M1 20v-6h6" />
-                            <path
-                                d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"
-                            />
-                        </svg>
-                    </button>
-                </div>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prism FM</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="picker-early.js"></script>
+    <style>
+        /* Hide everything until ready in picker mode */
+        .picker-mode-early body {
+            visibility: hidden;
+        }
 
-                <div class="path-bar">
-                    <div class="breadcrumb" id="path-segments"></div>
-                </div>
+        .picker-mode-early.picker-ready body {
+            visibility: visible;
+        }
+    </style>
+</head>
 
-                <div class="action-buttons">
-                    <button
-                        class="action-btn"
-                        id="new-folder-btn"
-                        title="New Folder"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path
-                                d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-                            ></path>
-                            <line x1="12" y1="11" x2="12" y2="17"></line>
-                            <line x1="9" y1="14" x2="15" y2="14"></line>
-                        </svg>
-                    </button>
-                    <button
-                        class="action-btn"
-                        id="new-file-btn"
-                        title="New File"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path
-                                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                            ></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="12" y1="11" x2="12" y2="17"></line>
-                            <line x1="9" y1="14" x2="15" y2="14"></line>
-                        </svg>
-                    </button>
-                    <button
-                        class="action-btn action-btn-wide"
-                        id="empty-trash-btn"
-                        title="Empty Trash"
-                        style="display: none"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path
-                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                            ></path>
-                        </svg>
-                        <span>Empty Trash</span>
-                    </button>
-                </div>
+<body>
+    <div class="app-container">
+        <div class="tab-bar" id="tab-bar"></div>
 
-                <div class="search-container">
-                    <svg
-                        class="search-icon"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="M21 21l-4.35-4.35" />
+        <div class="toolbar">
+            <div class="nav-buttons">
+                <button class="nav-btn sidebar-toggle" id="sidebar-toggle-btn" title="Toggle Sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12h18M3 6h18M3 18h18" />
                     </svg>
-                    <input
-                        type="text"
-                        id="search-input"
-                        class="search-input"
-                        placeholder="Search files..."
-                    />
-                </div>
+                </button>
+                <button class="nav-btn" id="back-btn" title="Back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                </button>
+                <button class="nav-btn" id="forward-btn" title="Forward">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6" />
+                    </svg>
+                </button>
+                <button class="nav-btn" id="up-btn" title="Up">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 15l-6-6-6 6" />
+                    </svg>
+                </button>
+                <button class="nav-btn" id="refresh-btn" title="Refresh">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6" />
+                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+                    </svg>
+                </button>
             </div>
 
-            <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+            <div class="path-bar">
+                <div class="breadcrumb" id="path-segments"></div>
+            </div>
 
-            <div class="main-content">
-                <div class="sidebar" id="sidebar">
-                    <div class="sidebar-scroll-area">
-                        <div class="sidebar-section">
-                            <div class="sidebar-title">Quick Access</div>
+            <div class="action-buttons">
+                <button class="action-btn" id="new-folder-btn" title="New Folder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        <line x1="12" y1="11" x2="12" y2="17"></line>
+                        <line x1="9" y1="14" x2="15" y2="14"></line>
+                    </svg>
+                </button>
+                <button class="action-btn" id="new-file-btn" title="New File">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="12" y1="11" x2="12" y2="17"></line>
+                        <line x1="9" y1="14" x2="15" y2="14"></line>
+                    </svg>
+                </button>
+                <button class="action-btn action-btn-wide" id="empty-trash-btn" title="Empty Trash"
+                    style="display: none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    <span>Empty Trash</span>
+                </button>
+            </div>
 
-                            <div id="pinned-list"></div>
-                        </div>
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
+                </svg>
+                <input type="text" id="search-input" class="search-input" placeholder="Search files..." />
+            </div>
+        </div>
 
-                        <div class="sidebar-section">
-                            <div class="sidebar-title">Disks</div>
-                            <div id="drives-list"></div>
-                        </div>
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
-                        <div class="sidebar-section">
-                            <div class="sidebar-title">Tags</div>
-                            <div id="tags-list"></div>
-                        </div>
+        <div class="main-content">
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-scroll-area">
+                    <div class="sidebar-section">
+                        <div class="sidebar-title">Quick Access</div>
+
+                        <div id="pinned-list"></div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <div class="sidebar-title">Disks</div>
+                        <div id="drives-list"></div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <div class="sidebar-title">Tags</div>
+                        <div id="tags-list"></div>
                     </div>
                 </div>
-                <div class="sidebar-resizer" id="sidebar-resizer" aria-hidden="true"></div>
+            </div>
+            <div class="sidebar-resizer" id="sidebar-resizer" aria-hidden="true"></div>
 
-                <div class="pane-host" id="pane-host">
-                    <div class="file-pane active" data-pane="left">
-                        <div class="file-list-container" data-pane="left">
-                            <div class="file-list-header">
-                                <div></div>
-                                <div class="header-name">Name</div>
-                                <div class="header-size">Size<span class="column-resizer" data-column="size"></span></div>
-                                <div class="header-date">Modified<span class="column-resizer" data-column="modified"></span></div>
-                                <div class="header-added">Added<span class="column-resizer" data-column="added"></span></div>
+            <div class="pane-host" id="pane-host">
+                <div class="file-pane active" data-pane="left">
+                    <div class="file-list-container" data-pane="left">
+                        <div class="file-list-header">
+                            <div></div>
+                            <div class="header-name">Name</div>
+                            <div class="header-size">Size<span class="column-resizer" data-column="size"></span></div>
+                            <div class="header-date">Modified<span class="column-resizer" data-column="modified"></span>
                             </div>
-                            <div class="file-list" id="file-grid-left" data-pane="left"></div>
-                        </div>
-                    </div>
-                    <div class="pane-divider" id="pane-divider"></div>
-                    <div class="file-pane" data-pane="right">
-                        <div class="file-list-container" data-pane="right">
-                            <div class="file-list-header">
-                                <div></div>
-                                <div class="header-name">Name</div>
-                                <div class="header-size">Size<span class="column-resizer" data-column="size"></span></div>
-                                <div class="header-date">Modified<span class="column-resizer" data-column="modified"></span></div>
-                                <div class="header-added">Added<span class="column-resizer" data-column="added"></span></div>
+                            <div class="header-added">Added<span class="column-resizer" data-column="added"></span>
                             </div>
-                            <div class="file-list" id="file-grid-right" data-pane="right"></div>
                         </div>
+                        <div class="file-list" id="file-grid-left" data-pane="left"></div>
                     </div>
                 </div>
-                <div class="preview-resizer" id="preview-resizer" aria-hidden="true"></div>
-                <div class="preview-panel" id="preview-panel">
-                    <div class="preview-header">
-                        <span class="preview-title">Preview</span>
-                    </div>
-                    <div class="preview-content" id="preview-content">
-                        <div class="preview-empty">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1"
-                                width="64"
-                                height="64"
-                            >
-                                <rect
-                                    x="3"
-                                    y="3"
-                                    width="18"
-                                    height="18"
-                                    rx="2"
-                                    ry="2"
-                                />
-                                <circle cx="8.5" cy="8.5" r="1.5" />
-                                <polyline points="21,15 16,10 5,21" />
-                            </svg>
-                            <p>Select a file to preview</p>
+                <div class="pane-divider" id="pane-divider"></div>
+                <div class="file-pane" data-pane="right">
+                    <div class="file-list-container" data-pane="right">
+                        <div class="file-list-header">
+                            <div></div>
+                            <div class="header-name">Name</div>
+                            <div class="header-size">Size<span class="column-resizer" data-column="size"></span></div>
+                            <div class="header-date">Modified<span class="column-resizer" data-column="modified"></span>
+                            </div>
+                            <div class="header-added">Added<span class="column-resizer" data-column="added"></span>
+                            </div>
                         </div>
+                        <div class="file-list" id="file-grid-right" data-pane="right"></div>
                     </div>
                 </div>
             </div>
-
-            <div class="progress-bar-container" id="progress-bar-container">
-                <div class="progress-bar-fill" id="progress-bar-fill"></div>
-            </div>
-
-            <div class="status-bar">
-                <div class="status-left">
-                    <span id="item-count">0 items</span>
-                    <button
-                        id="view-mode-btn"
-                        class="status-bar-icon-btn"
-                        title="View Mode"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path
-                                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                            ></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                    </button>
-                    <button
-                        id="sort-btn"
-                        class="status-bar-icon-btn"
-                        title="Sort"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <line x1="4" y1="21" x2="4" y2="14" />
-                            <line x1="4" y1="10" x2="4" y2="3" />
-                            <line x1="12" y1="21" x2="12" y2="12" />
-                            <line x1="12" y1="8" x2="12" y2="3" />
-                            <line x1="20" y1="21" x2="20" y2="16" />
-                            <line x1="20" y1="12" x2="20" y2="3" />
-                            <line x1="1" y1="14" x2="7" y2="14" />
-                            <line x1="9" y1="8" x2="15" y2="8" />
-                            <line x1="17" y1="16" x2="23" y2="16" />
-                        </svg>
-                    </button>
-                    <button
-                        id="group-btn"
-                        class="status-bar-icon-btn"
-                        title="Group"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path
-                                d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-                            ></path>
-                        </svg>
-                    </button>
-                    <button
-                        id="settings-btn"
-                        class="status-bar-icon-btn"
-                        title="Settings"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <line x1="3" y1="12" x2="21" y2="12"></line>
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <line x1="3" y1="18" x2="21" y2="18"></line>
-                        </svg>
-                    </button>
-                    <button
-                        id="ops-btn"
-                        class="status-bar-icon-btn"
-                        title="Operations"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <circle cx="12" cy="12" r="9"></circle>
-                            <path d="M12 7v5l3 3"></path>
-                        </svg>
-                    </button>
-                    <span id="selected-count"></span>
+            <div class="preview-resizer" id="preview-resizer" aria-hidden="true"></div>
+            <div class="preview-panel" id="preview-panel">
+                <div class="preview-header">
+                    <span class="preview-title">Preview</span>
                 </div>
-                <div class="status-right">
-                    <span id="current-path"></span>
+                <div class="preview-content" id="preview-content">
+                    <div class="preview-empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" width="64"
+                            height="64">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21,15 16,10 5,21" />
+                        </svg>
+                        <p>Select a file to preview</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="context-menu" id="context-menu">
-            <div class="context-menu-panel" id="context-menu-panel"></div>
-
-            <div
-                class="context-submenu"
-                id="context-submenu"
-                style="display: none"
-            ></div>
+        <div class="progress-bar-container" id="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar-fill"></div>
         </div>
 
-        <div class="view-menu" id="view-menu"></div>
-
-        <div class="settings-menu" id="settings-menu"></div>
-
-        <div class="theme-modal" id="theme-modal">
-            <div class="theme-modal-panel">
-                <div class="theme-modal-header">
-                    <div class="theme-modal-title">Customize Colors</div>
-                    <button class="theme-modal-close" id="theme-close-btn" title="Close">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                <div class="theme-modal-body" id="theme-modal-body"></div>
-                <div class="theme-modal-footer">
-                    <button class="theme-btn" id="theme-reset-btn">
-                        Reset to Default
-                    </button>
-                    <div class="theme-footer-spacer"></div>
-                    <button class="theme-btn primary" id="theme-save-btn">
-                        Done
-                    </button>
-                </div>
+        <div class="status-bar">
+            <div class="status-left">
+                <span id="item-count">0 items</span>
+                <button id="view-mode-btn" class="status-bar-icon-btn" title="View Mode">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+                <button id="sort-btn" class="status-bar-icon-btn" title="Sort">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="4" y1="21" x2="4" y2="14" />
+                        <line x1="4" y1="10" x2="4" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12" y2="3" />
+                        <line x1="20" y1="21" x2="20" y2="16" />
+                        <line x1="20" y1="12" x2="20" y2="3" />
+                        <line x1="1" y1="14" x2="7" y2="14" />
+                        <line x1="9" y1="8" x2="15" y2="8" />
+                        <line x1="17" y1="16" x2="23" y2="16" />
+                    </svg>
+                </button>
+                <button id="group-btn" class="status-bar-icon-btn" title="Group">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </button>
+                <button id="settings-btn" class="status-bar-icon-btn" title="Settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <button id="ops-btn" class="status-bar-icon-btn" title="Operations">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <path d="M12 7v5l3 3"></path>
+                    </svg>
+                </button>
+                <span id="selected-count"></span>
+                <span id="file-type-info" class="file-type-info"></span>
+            </div>
+            <div class="status-right">
+                <span id="current-path"></span>
             </div>
         </div>
+    </div>
 
-        <div class="ops-panel" id="ops-panel">
-            <div class="ops-header">
-                <div class="ops-title">Operations</div>
-                <div class="ops-header-actions">
-                    <button class="ops-icon-btn" id="ops-pause-btn" title="Pause queue">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <rect x="6" y="5" width="4" height="14" rx="1"></rect>
-                            <rect x="14" y="5" width="4" height="14" rx="1"></rect>
-                        </svg>
-                    </button>
-                    <button class="ops-icon-btn" id="ops-clear-btn" title="Clear history">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"></path>
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"></path>
-                        </svg>
-                    </button>
-                    <button class="ops-icon-btn" id="ops-close-btn" title="Close">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-panel" id="context-menu-panel"></div>
+
+        <div class="context-submenu" id="context-submenu" style="display: none"></div>
+    </div>
+
+    <div class="view-menu" id="view-menu"></div>
+
+    <div class="settings-menu" id="settings-menu"></div>
+
+    <div class="theme-modal" id="theme-modal">
+        <div class="theme-modal-panel">
+            <div class="theme-modal-header">
+                <div class="theme-modal-title">Customize Colors</div>
+                <button class="theme-modal-close" id="theme-close-btn" title="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
-            <div class="ops-body">
-                <div class="ops-section">
-                    <div class="ops-section-title">Queue</div>
-                    <div class="ops-list" id="ops-queue-list"></div>
-                </div>
-                <div class="ops-section">
-                    <div class="ops-section-title">History</div>
-                    <div class="ops-list" id="ops-history-list"></div>
-                </div>
+            <div class="theme-modal-body" id="theme-modal-body"></div>
+            <div class="theme-modal-footer">
+                <button class="theme-btn" id="theme-reset-btn">
+                    Reset to Default
+                </button>
+                <div class="theme-footer-spacer"></div>
+                <button class="theme-btn primary" id="theme-save-btn">
+                    Done
+                </button>
             </div>
         </div>
+    </div>
 
-        <script src="renderer/core.js"></script>
-        <script src="renderer/panes-tabs.js"></script>
-        <script src="renderer/ui-events.js"></script>
-        <script src="renderer/views-utils.js"></script>
-        <script src="renderer/views-sidebar.js"></script>
-        <script src="renderer/views-navigation.js"></script>
-        <script src="renderer/views-menus.js"></script>
-        <script src="renderer/views-render.js"></script>
-        <script src="renderer/views-actions.js"></script>
-        <script src="renderer/views-folder-sizes.js"></script>
-        <script src="renderer/views-preview.js"></script>
-    </body>
+    <div class="ops-panel" id="ops-panel">
+        <div class="ops-header">
+            <div class="ops-title">Operations</div>
+            <div class="ops-header-actions">
+                <button class="ops-icon-btn" id="ops-pause-btn" title="Pause queue">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="6" y="5" width="4" height="14" rx="1"></rect>
+                        <rect x="14" y="5" width="4" height="14" rx="1"></rect>
+                    </svg>
+                </button>
+                <button class="ops-icon-btn" id="ops-clear-btn" title="Clear history">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"></path>
+                        <path d="M10 11v6"></path>
+                        <path d="M14 11v6"></path>
+                        <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"></path>
+                    </svg>
+                </button>
+                <button class="ops-icon-btn" id="ops-close-btn" title="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="ops-body">
+            <div class="ops-section">
+                <div class="ops-section-title">Queue</div>
+                <div class="ops-list" id="ops-queue-list"></div>
+            </div>
+            <div class="ops-section">
+                <div class="ops-section-title">History</div>
+                <div class="ops-list" id="ops-history-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer/core.js"></script>
+    <script src="renderer/panes-tabs.js"></script>
+    <script src="renderer/ui-events.js"></script>
+    <script src="renderer/views-utils.js"></script>
+    <script src="renderer/views-sidebar.js"></script>
+    <script src="renderer/views-navigation.js"></script>
+    <script src="renderer/views-menus.js"></script>
+    <script src="renderer/views-render.js"></script>
+    <script src="renderer/views-actions.js"></script>
+    <script src="renderer/views-folder-sizes.js"></script>
+    <script src="renderer/views-preview.js"></script>
+</body>
+
 </html>

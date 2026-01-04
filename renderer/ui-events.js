@@ -135,7 +135,7 @@ function setupToggleButtons() {
       togglePreviewBtn.classList.toggle("active", showPreviewPane);
       try {
         localStorage.setItem("showPreviewPane", String(showPreviewPane));
-      } catch {}
+      } catch { }
       updatePreviewPanelVisibility();
     });
   }
@@ -408,21 +408,9 @@ function setupFileListHandlers() {
   attachHandlers(fileListRight, "right");
 }
 
-const COLUMN_WIDTH_STORAGE_KEY = "columnWidthsV1";
-const SIDEBAR_WIDTH_STORAGE_KEY = "sidebarWidthV1";
-const PREVIEW_WIDTH_STORAGE_KEY = "previewWidthV1";
 
-const COLUMN_DEFAULTS = {
-  size: 100,
-  modified: 140,
-  added: 140,
-};
 
-const COLUMN_MIN = {
-  size: 70,
-  modified: 90,
-  added: 90,
-};
+
 
 function clampMin(value, min) {
   return Math.max(min, value);
@@ -508,7 +496,7 @@ function setupColumnResizers() {
         window.removeEventListener("mouseup", onUp);
         try {
           localStorage.setItem(COLUMN_WIDTH_STORAGE_KEY, JSON.stringify(widths));
-        } catch {}
+        } catch { }
       };
 
       window.addEventListener("mousemove", onMove);
@@ -630,7 +618,7 @@ function setupPanelResizers() {
         const width = sidebarEl.getBoundingClientRect().width;
         try {
           localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(Math.round(width)));
-        } catch {}
+        } catch { }
       };
 
       window.addEventListener("mousemove", onMove);
@@ -662,7 +650,7 @@ function setupPanelResizers() {
         const width = previewPanel.getBoundingClientRect().width;
         try {
           localStorage.setItem(PREVIEW_WIDTH_STORAGE_KEY, String(Math.round(width)));
-        } catch {}
+        } catch { }
       };
 
       window.addEventListener("mousemove", onMove);
@@ -702,7 +690,7 @@ function setupEventListeners() {
   document.addEventListener("keydown", handleKeyboard);
 }
 
-document.addEventListener("ezfm:columns-updated", () => {
+document.addEventListener("prism:columns-updated", () => {
   updateResponsiveColumns();
   refreshColumnResizers();
 });
@@ -897,7 +885,7 @@ function setupQuickAccess() {
         if (taggedCount > 0) {
           try {
             localStorage.setItem("fileTags", JSON.stringify(fileTags));
-          } catch {}
+          } catch { }
           showNotification(`Tagged ${taggedCount} item(s) as ${tagColor}`);
 
           if (currentPath === `tag://${tagColor}`) navigateTo(currentPath);
@@ -922,7 +910,7 @@ function setupQuickAccess() {
             addPin(itemPath, label);
             pinCount++;
           }
-        } catch (err) {}
+        } catch (err) { }
       }
     }
 

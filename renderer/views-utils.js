@@ -18,7 +18,7 @@ function isPathWithin(basePath, candidatePath) {
   return candidate.startsWith(base + "/");
 }
 
-const EXTERNAL_MOUNT_PREFIXES = ["/run/media", "/media", "/mnt", "/Volumes"];
+
 
 function isExternalPath(path) {
   const candidate = normalizePathForCompare(path);
@@ -56,7 +56,7 @@ function setFolderSizeEnabled(enabled) {
   calculateFolderSizes = Boolean(enabled);
   try {
     localStorage.setItem("calculateFolderSizes", String(calculateFolderSizes));
-  } catch {}
+  } catch { }
 
   if (!calculateFolderSizes) {
     cancelAllFolderSizeWork();
@@ -104,7 +104,7 @@ async function prepareUnmount(mountPath) {
   let homeDir = null;
   try {
     homeDir = await window.fileManager.getHomeDirectory();
-  } catch {}
+  } catch { }
 
   const toClose = [];
   for (let i = 0; i < tabs.length; i++) {
@@ -119,8 +119,8 @@ async function prepareUnmount(mountPath) {
         if (splitViewEnabled && panes.right?.path) {
           if (isPathWithin(base, panes.right.path)) {
             panes.right.path = homeDir || panes.right.path;
-            panes.right.history = panes.right.path ? [panes.right.path] : [];
-            panes.right.historyIndex = panes.right.history.length ? 0 : -1;
+            panes.right.appHistory = panes.right.path ? [panes.right.path] : [];
+            panes.right.historyIndex = panes.right.appHistory.length ? 0 : -1;
             panes.right.selectedItems = new Set();
             await ensurePaneLoaded("right", panes.right.path);
           }
@@ -152,8 +152,8 @@ function getBuiltinIconForPath(path) {
 }
 
 function getTabIconForPath(path) {
-  if (String(path || "").startsWith("tag://")) return icons.folder;
-  return getBuiltinIconForPath(path) || icons.folder;
+  if (String(path || "").startsWith("tag://")) return BUILTIN_ICONS.folder;
+  return getBuiltinIconForPath(path) || BUILTIN_ICONS.folder;
 }
 
 function getTabLabelForPath(path) {

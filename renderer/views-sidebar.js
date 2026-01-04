@@ -36,9 +36,9 @@ function loadQuickAccessItems() {
             typeof x.label === "string" && x.label.trim()
               ? x.label.trim()
               : String(x.path || "")
-                  .split(/[/\\]/)
-                  .filter(Boolean)
-                  .pop() || String(x.path || ""),
+                .split(/[/\\]/)
+                .filter(Boolean)
+                .pop() || String(x.path || ""),
         };
       })
       .filter((x) => (x.type === "builtin" ? Boolean(x.key) : Boolean(x.path)));
@@ -59,7 +59,7 @@ function saveQuickAccessItems() {
       QUICK_ACCESS_STORAGE_KEY,
       JSON.stringify(quickAccessItems),
     );
-  } catch {}
+  } catch { }
 }
 
 function resolveQuickAccessPath(item) {
@@ -163,6 +163,25 @@ function moveQuickAccess(id, direction) {
   copy.splice(next, 0, item);
   quickAccessItems = copy;
 
+  saveQuickAccessItems();
+  renderPinnedItems();
+  syncQuickAccessHighlight();
+}
+
+async function renameQuickAccess(id) {
+  const item = quickAccessItems.find((x) => x.id === id);
+  if (!item) return;
+
+  const newLabel = await showTextInputModal(
+    "Rename Pin",
+    "Enter new name:",
+    item.label || item.key || "Pinned",
+    "Rename"
+  );
+
+  if (newLabel === null) return;
+
+  item.label = newLabel;
   saveQuickAccessItems();
   renderPinnedItems();
   syncQuickAccessHighlight();

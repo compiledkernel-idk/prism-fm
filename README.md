@@ -1,167 +1,93 @@
-# Archived due to feedback of Electron being "slow", feel free to fork.
-# EZ File Manager
+# Prism FM
 
-A lightweight Linux file manager with a transparent UI and proper XDG Desktop Portal support.
-Built mainly because I wanted a modern-looking file picker that actually behaves how I expect.
+A modern, transparent file manager for Linux with glassmorphism UI.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)
-![Electron](https://img.shields.io/badge/electron-28.3.3-47848F.svg)
+![License](https://img.shields.io/badge/license-GPL--3.0-blue)
+![Platform](https://img.shields.io/badge/platform-Linux-lightgrey)
+![Preview](file-manager.png)
 
+## Features
 
-
-![Logo](icon.png)
-![FileManager](file-manager.png)
-![FilePicker](file-picker.png)
-
-## What it does
-
-* Transparent UI that blends into the desktop
-* Multiple views: list, compact list, grid, thumbnails
-* Tabs
-* Sorting by name, date, size, type, etc.
-* Optional grouping (by type, date, size)
-* Per-folder view settings (Persistent)
-* Folder Pinning
-* Simple color-based file tagging
-* Preview panel for images, videos, and text files
-* Browse archives (zip, tar, 7z, etc.)
-* Works as a system file picker via XDG Desktop Portal
-* Partial keyboard navigation
-* Handles large folders efficiently using lazy loading
+- 🎨 **Glassmorphism UI** - Beautiful transparent interface with backdrop blur
+- ⚡ **Fast & Lightweight** - Optimized Electron with GPU acceleration
+- 🖼️ **Image Previews** - Built-in image viewer with metadata
+- 📁 **Dual Pane** - Side-by-side file navigation
+- 🏷️ **File Tagging** - Color-coded organization system
+- 🔍 **Quick Search** - Find files instantly
+- 📋 **File Operations** - Copy, move, delete with undo support
+- 🗜️ **Archive Support** - Extract and compress files
+- 🎯 **XDG Portal** - System-wide file picker integration
 
 ## Installation
 
+### Quick Install
+
+```bash
+git clone https://github.com/compiledkernel-idk/prism-fm.git
+cd prism-fm
+chmod +x install.sh
+./install.sh
+```
+
 ### Dependencies
 
-Required:
-
-```bash
-# Arch Linux
-sudo pacman -S --needed nodejs npm electron
-
-# Ubuntu / Debian
-sudo apt install nodejs npm
-```
-
-
-Optional (App works fine without them but it is recomended):
-
-- `p7zip` (`7z`), `unzip`, `zip`, `tar`, `gzip`, `bzip2`, `xz` for archive list/extract/compress
-- `ffmpeg`/`ffprobe` for video metadata in preview
-- `udisks2` (`udisksctl`), `gio`, `lsblk` for drive mount/unmount and detection
-- `zenity` for the zenity wrapper integration
-- `xdg-desktop-portal` + compositor portal (e.g. `xdg-desktop-portal-hyprland`) for portal picker
-- a terminal (`kitty`, `gnome-terminal`, `x-terminal-emulator`) for "Open in Terminal"
-
-### Run
-
-```bash
-git clone https://github.com/TechyTechster/ez-fm.git
-cd ez-fm
-
-./install.sh
-ez-fm
-```
-
+- Node.js >= 18.0.0
+- npm
+- Electron
 
 ## Usage
 
-### Keyboard shortcuts
-
-| Shortcut       | Action                   |
-| -------------- | ------------------------ |
-| `Ctrl+T`       | New tab                  |
-| `Ctrl+W`       | Close tab                |
-| `Ctrl+L`       | Focus path bar           |
-| `Ctrl+F`       | Search                   |
-| `Ctrl+H`       | Show / hide hidden files |
-| `Ctrl+C`       | Copy                     |
-| `Ctrl+X`       | Cut                      |
-| `Ctrl+V`       | Paste                    |
-| `Delete`       | Move to trash            |
-| `Shift+Delete` | Delete permanently       |
-| `F2`           | Rename                   |
-| `Backspace`    | Go up                    |
-| `Enter`        | Open                     |
-| `Ctrl+A`       | Select all               |
-
-### Command-line options
-
+Run from terminal:
 ```bash
-# Open a directory
-ez-fm -- /path/to/folder
-
-# File picker modes
-ez-fm start -- --picker --mode=open
-ez-fm start -- --picker --mode=save --filename=document.txt
-ez-fm start -- --picker --mode=directory
+prism-fm [path]
 ```
+
+Or launch from your application menu as "Prism FM".
+
+### Keyboard Shortcuts
+
+- `Ctrl+C` - Copy
+- `Ctrl+X` - Cut
+- `Ctrl+V` - Paste
+- `Ctrl+A` - Select all
+- `Ctrl+R` - Refresh
+- `Ctrl+T` - New tab
+- `Ctrl+W` - Close tab
+- `Ctrl+L` - Focus path bar
+- `Ctrl+F` - Focus search
+- `Ctrl+H` - Toggle hidden files
+- `F2` - Rename
+- `Delete` - Move to trash
+- `Shift+Delete` - Permanent delete
 
 ## Configuration
 
-* View settings are saved per folder automatically
-* Global preferences are stored in localStorage
+Prism FM stores its configuration in `~/.config/prism-fm/`.
 
-No config files needed unless you want to customize window rules.
+### Hyprland Users
 
-### Hyprland example
-
-```conf
-windowrulev2 = float, title:^(Open File|Save File|Select Folder)$
-windowrulev2 = center, title:^(Open File|Save File|Select Folder)$
-windowrulev2 = size 1000 700, title:^(Open File|Save File|Select Folder)$
-```
-
-## Project layout
+For best transparency on Hyprland, add to your config:
 
 ```
-ez-fm/
-├── main.js           # Electron main process
-├── renderer/         # UI logic (split)
-├── preload.js        # IPC bridge
-├── portal-service.js # XDG portal backend
-├── index.html        # UI markup
-├── styles.css        # Styling
-└── install.sh        # Installer
+layerrule = blur,class:prism-fm
+windowrulev2 = opacity 0.9 0.8,class:^(prism-fm)$
 ```
 
-## Contributing
-
-PRs are welcome.
-
-1. Fork the repo
-2. Create a branch
-3. Commit your changes
-4. Open a pull request
-
-If you’re unsure about something, open an issue first.
-
-## Troubleshooting
-
-### Portal service problems
+## Development
 
 ```bash
-systemctl --user status myfm-portal
-journalctl --user -u myfm-portal -f
-systemctl --user restart xdg-desktop-portal
+# Run in development mode
+npm run dev
+
+# Start normally
+npm start
 ```
 
-### App not using EZ File Manager as picker
+## Credits
 
-Some apps cache portal connections.
-
-Try:
-
-1. Restart the app
-2. Restart `xdg-desktop-portal`
+- Original author: tomiwaf
+- Continued development: compiledkernel-idk
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
-
-## Notes
-
-* Built with Electron
-* Uses `dbus-next` for portal integration
-* UI loosely inspired by macOS Finder (without copying its behavior)
+GPL-3.0 - See [LICENSE](LICENSE) for details.

@@ -1,7 +1,3 @@
-/* ============================================================================
-   Reset & Base Styles
-   ============================================================================ */
-
 * {
     margin: 0;
     padding: 0;
@@ -10,10 +6,10 @@
 }
 
 :root {
-    --bg-primary: rgba(30, 30, 40, 0);
-    --bg-secondary: rgba(45, 45, 60, 0);
-    --bg-tertiary: rgba(60, 60, 80, 0);
-    --bg-overlay: rgba(0, 0, 0, 0.5);
+    --bg-primary: rgba(30, 30, 40, 0.05);
+    --bg-secondary: rgba(45, 45, 60, 0.05);
+    --bg-tertiary: rgba(60, 60, 80, 0.05);
+    --bg-overlay: rgba(100, 100, 100, 0.05);
     --menu-bg: rgba(30, 30, 40, 0.6);
     --menu-overlay-bg: rgba(30, 30, 40, 0.7);
     --bg-hover: rgba(255, 255, 255, 0.25);
@@ -28,7 +24,7 @@
     --success-color: rgba(100, 255, 150, 0.8);
     --danger-color: rgba(255, 100, 100, 0.8);
     --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    --blur-amount: 50px;
+    --blur-amount: 20px;
 }
 
 body {
@@ -54,11 +50,15 @@ body {
     -webkit-backdrop-filter: blur(var(--blur-amount));
     --sidebar-width: 200px;
     --preview-width: 320px;
+    will-change: transform;
+    contain: layout style paint;
 }
 
 .app-container.archive-mode {
     background: rgba(255, 165, 0, 0.05);
 }
+
+
 
 .app-container.archive-mode .file-list-header {
     background: rgba(255, 165, 0, 0.1);
@@ -73,9 +73,6 @@ body {
     visibility: hidden;
 }
 
-/* ============================================================================
-   Toolbar
-   ============================================================================ */
 
 .toolbar {
     display: flex;
@@ -125,9 +122,6 @@ body {
     height: 18px;
 }
 
-/* ============================================================================
-   Path Bar & Breadcrumbs
-   ============================================================================ */
 
 .path-bar {
     flex: 1;
@@ -204,9 +198,6 @@ body {
     border-color: var(--accent-color);
 }
 
-/* ============================================================================
-   Search Bar
-   ============================================================================ */
 
 .search-container {
     position: relative;
@@ -248,9 +239,6 @@ body {
     pointer-events: none;
 }
 
-/* ============================================================================
-   Action Buttons
-   ============================================================================ */
 
 .action-buttons {
     display: flex;
@@ -305,9 +293,6 @@ body {
     flex-shrink: 0;
 }
 
-/* ============================================================================
-   Tab Bar
-   ============================================================================ */
 
 .tab-bar {
     display: flex;
@@ -406,9 +391,6 @@ body {
     background: var(--bg-hover);
 }
 
-/* ============================================================================
-   Main Content Layout
-   ============================================================================ */
 
 .main-content {
     display: flex;
@@ -472,11 +454,11 @@ body {
     min-width: 0;
 }
 
-.file-list-container > .file-list-header {
+.file-list-container>.file-list-header {
     flex-shrink: 0;
 }
 
-.file-list-container > .file-list {
+.file-list-container>.file-list {
     flex: 1;
     min-width: 0;
 }
@@ -503,9 +485,6 @@ body {
     opacity: 1;
 }
 
-/* ============================================================================
-   Sidebar
-   ============================================================================ */
 
 .sidebar {
     width: var(--sidebar-width);
@@ -626,9 +605,6 @@ body {
     margin-right: 4px;
 }
 
-/* ============================================================================
-   Sidebar — Drag & Drop
-   ============================================================================ */
 
 .sidebar-drop-zone {
     position: relative;
@@ -678,9 +654,6 @@ body {
     pointer-events: none;
 }
 
-/* ============================================================================
-   Sidebar — Drives
-   ============================================================================ */
 
 .drive-icon-wrapper {
     position: relative;
@@ -784,9 +757,6 @@ body {
     color: var(--text-muted);
 }
 
-/* ============================================================================
-   File List — Header & Grid
-   ============================================================================ */
 
 .file-list-header {
     display: grid;
@@ -799,7 +769,7 @@ body {
     background: var(--bg-tertiary);
 }
 
-.file-list-header > div {
+.file-list-header>div {
     position: relative;
     overflow: visible;
 }
@@ -838,23 +808,6 @@ body {
     background: transparent;
 }
 
-/* Column visibility controls */
-.file-list-container:is(.hide-size, .responsive-hide-size) .header-size,
-.file-list-container:is(.hide-size, .responsive-hide-size) .file-size {
-    display: none;
-}
-
-.file-list-container:is(.hide-modified, .responsive-hide-modified) .header-date,
-.file-list-container:is(.hide-modified, .responsive-hide-modified) .file-date {
-    display: none;
-}
-
-.file-list-container:is(.hide-added, .responsive-hide-added) .header-added,
-.file-list-container:is(.hide-added, .responsive-hide-added) .file-added {
-    display: none;
-}
-
-/* Adjust grid columns based on hidden columns */
 .file-list-container:is(.hide-size, .responsive-hide-size) .file-list-header,
 .file-list-container:is(.hide-size, .responsive-hide-size) .file-item {
     grid-template-columns: var(--col-icon) 1fr var(--col-modified) var(--col-added);
@@ -890,9 +843,6 @@ body {
     grid-template-columns: var(--col-icon) 1fr;
 }
 
-/* ============================================================================
-   File List — Scrollable Area
-   ============================================================================ */
 
 .file-list {
     flex: 1;
@@ -917,9 +867,6 @@ body {
     background: var(--bg-active);
 }
 
-/* ============================================================================
-   File List — Group Headers
-   ============================================================================ */
 
 .group-header {
     display: flex;
@@ -974,9 +921,6 @@ body {
     transform: rotate(0deg);
 }
 
-/* ============================================================================
-   File List — Items (Default View)
-   ============================================================================ */
 
 .file-item {
     display: grid;
@@ -1046,9 +990,6 @@ body {
     color: var(--text-muted);
 }
 
-/* ============================================================================
-   File List — Tags
-   ============================================================================ */
 
 .file-tags {
     display: inline-flex;
@@ -1091,33 +1032,7 @@ body {
     box-shadow: 0 0 0 1px var(--bg-primary);
 }
 
-/* ============================================================================
-   File List — View Modes
-   ============================================================================ */
 
-/* List View (Compact) */
-.file-list.list-view .file-item {
-    grid-template-columns: 32px 1fr;
-    padding: 4px 8px;
-}
-
-.file-list.list-view .file-size,
-.file-list.list-view .file-date,
-.file-list.list-view .file-added {
-    display: none;
-}
-
-.file-list.list-view .file-icon {
-    width: 24px;
-    height: 24px;
-}
-
-.file-list.list-view .file-icon svg {
-    width: 18px;
-    height: 18px;
-}
-
-/* Grid View */
 .file-list.grid-view {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -1166,71 +1081,6 @@ body {
     grid-column: 1 / -1;
 }
 
-/* Thumbnail View */
-.file-list.thumbnail-view {
-    display: grid;
-    grid-template-columns: repeat(
-        auto-fill,
-        minmax(var(--thumbnail-size, 140px), 1fr)
-    );
-    gap: 16px;
-    align-content: start;
-}
-
-.file-list.thumbnail-view .file-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    height: 100%;
-    padding: 10px;
-}
-
-.file-list.thumbnail-view .file-icon {
-    width: 100%;
-    height: calc(var(--thumbnail-size, 140px) * 0.7);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.file-list.thumbnail-view .file-icon svg {
-    width: 48px;
-    height: 48px;
-}
-
-.file-list.thumbnail-view .file-icon img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 4px;
-}
-
-.file-list.thumbnail-view .file-name {
-    padding-right: 0;
-    white-space: normal;
-    word-break: break-word;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    font-size: 12px;
-}
-
-.file-list.thumbnail-view .file-size,
-.file-list.thumbnail-view .file-date,
-.file-list.thumbnail-view .file-added {
-    display: none;
-}
-
-.file-list.thumbnail-view .group-header {
-    grid-column: 1 / -1;
-}
-
-/* ============================================================================
-   File List — Empty State
-   ============================================================================ */
 
 .empty-state {
     display: flex;
@@ -1255,9 +1105,6 @@ body {
     text-align: center;
 }
 
-/* ============================================================================
-   Preview Panel
-   ============================================================================ */
 
 .preview-panel {
     width: var(--preview-width);
@@ -1487,9 +1334,6 @@ body {
     margin: 0;
 }
 
-/* ============================================================================
-   Context Menus
-   ============================================================================ */
 
 .context-menu {
     position: fixed;
@@ -1515,6 +1359,7 @@ body {
         opacity: 0;
         transform: scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -1611,9 +1456,6 @@ body {
     margin: 8px 0;
 }
 
-/* ============================================================================
-   View Menu & Settings Menu
-   ============================================================================ */
 
 .view-menu {
     position: absolute;
@@ -1685,9 +1527,6 @@ body {
     border-radius: 3px;
 }
 
-/* ============================================================================
-   Theme Customizer
-   ============================================================================ */
 
 .theme-modal {
     position: fixed;
@@ -1909,9 +1748,6 @@ body {
     }
 }
 
-/* ============================================================================
-   Sort Select
-   ============================================================================ */
 
 .sort-select {
     width: 100%;
@@ -1934,9 +1770,6 @@ body {
     color: var(--text-primary);
 }
 
-/* ============================================================================
-   Progress Bar
-   ============================================================================ */
 
 .progress-bar-container {
     height: 4px;
@@ -1952,9 +1785,6 @@ body {
     transition: width 0.2s ease;
 }
 
-/* ============================================================================
-   Status Bar
-   ============================================================================ */
 
 .status-bar {
     display: flex;
@@ -1970,6 +1800,15 @@ body {
 .status-left {
     display: flex;
     gap: 20px;
+}
+
+.file-type-info {
+    color: var(--text-secondary);
+    font-size: 11px;
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .status-right {
@@ -1999,9 +1838,6 @@ body {
     height: 14px;
 }
 
-/* ============================================================================
-   Operations Panel
-   ============================================================================ */
 
 .ops-panel {
     position: fixed;
@@ -2159,9 +1995,6 @@ body {
     padding: 6px 2px;
 }
 
-/* ============================================================================
-   Notifications
-   ============================================================================ */
 
 .notification {
     position: fixed;
@@ -2188,15 +2021,13 @@ body {
         transform: translateX(100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
     }
 }
 
-/* ============================================================================
-   Utility Classes
-   ============================================================================ */
 
 .size-spinner {
     display: inline-block;
@@ -2215,9 +2046,6 @@ body {
     }
 }
 
-/* ============================================================================
-   Picker Mode
-   ============================================================================ */
 
 .picker-mode .status-bar {
     display: none !important;
@@ -2317,9 +2145,6 @@ body {
     color: white;
 }
 
-/* ============================================================================
-   Responsive — Tablet (900px)
-   ============================================================================ */
 
 @media (max-width: 1050px) {
     .app-container {
@@ -2339,9 +2164,6 @@ body {
     }
 }
 
-/* ============================================================================
-   Responsive — Mobile Landscape (800px)
-   ============================================================================ */
 
 @media (max-width: 800px) {
     .file-list-container {
@@ -2400,9 +2222,6 @@ body {
     }
 }
 
-/* ============================================================================
-   Responsive — Mobile Portrait (650px)
-   ============================================================================ */
 
 @media (max-width: 650px) {
     .toolbar {
@@ -2475,9 +2294,6 @@ body {
     }
 }
 
-/* ============================================================================
-   Responsive — Small Mobile (480px)
-   ============================================================================ */
 
 @media (max-width: 480px) {
     .toolbar {

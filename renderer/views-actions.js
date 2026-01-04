@@ -17,7 +17,7 @@ async function copySelected() {
 
   try {
     await window.fileManager.clipboardCopyPaths(clipboardItems);
-  } catch {}
+  } catch { }
 
   showNotification(`Copied ${clipboardItems.length} item(s)`);
 }
@@ -31,7 +31,7 @@ async function cutSelected() {
 
   try {
     await window.fileManager.clipboardCopyPaths(clipboardItems);
-  } catch {}
+  } catch { }
 
   showNotification(`Cut ${clipboardItems.length} item(s)`);
 }
@@ -789,6 +789,7 @@ function handleKeyboard(e) {
   } else {
     switch (e.key) {
       case "Delete":
+      case "Del":
         deleteSelected({ forcePermanent: e.shiftKey });
         break;
       case "F2":

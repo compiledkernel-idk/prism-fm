@@ -70,7 +70,7 @@ function updateNavigationButtons() {
   const forwardBtn = document.getElementById("forward-btn");
 
   if (backBtn) backBtn.disabled = historyIndex <= 0;
-  if (forwardBtn) forwardBtn.disabled = historyIndex >= history.length - 1;
+  if (forwardBtn) forwardBtn.disabled = historyIndex >= appHistory.length - 1;
 }
 
 function getFileType(item) {
@@ -277,10 +277,11 @@ function getItemTagsHtml(itemPath) {
 }
 
 function getThumbnailProps(fileType) {
+  const icon = BUILTIN_ICONS[fileType.icon] || BUILTIN_ICONS.default || "";
   if (viewMode === "thumbnail" && fileType === fileTypes.image) {
-    return { iconContent: fileType.icon, shouldObserveThumbnail: true };
+    return { iconContent: icon, shouldObserveThumbnail: true };
   }
-  return { iconContent: fileType.icon, shouldObserveThumbnail: false };
+  return { iconContent: icon, shouldObserveThumbnail: false };
 }
 
 function buildItemHtml(
@@ -292,11 +293,10 @@ function buildItemHtml(
   shouldObserveThumbnail,
 ) {
   return `
-      <div class="file-icon" style="color: ${fileType.color}"${
-        shouldObserveThumbnail
-          ? ` data-thumb-path="${escapeHtmlAttr(item.path)}" data-fallback-icon="${escapeHtmlAttr(fileType.icon)}"`
-          : ""
-      }>
+      <div class="file-icon" style="color: ${fileType.color}"${shouldObserveThumbnail
+      ? ` data-thumb-path="${escapeHtmlAttr(item.path)}" data-fallback-icon="${escapeHtmlAttr(fileType.icon)}"`
+      : ""
+    }>
         ${iconContent}
       </div>
       <div class="file-name">${escapeHtml(item.name)}${tagsHtml}</div>
@@ -455,6 +455,27 @@ function renderFileItem(item) {
   setupDragHandlers(element, item);
   if (item.isDirectory) setupFolderDropHandlers(element, item);
   setupItemClickHandlers(element, item);
+
+
+  let hoverTimeout = null;
+  element.addEventListener("mouseenter", () => {
+    hoverTimeout = setTimeout(async () => {
+      const fileTypeInfo = document.getElementById("file-type-info");
+      if (fileTypeInfo && window.fileManager.getFileType) {
+        try {
+          const result = await window.fileManager.getFileType(item.path);
+          if (result && result.success) {
+            fileTypeInfo.textContent = result.fileType;
+          }
+        } catch { }
+      }
+    }, 200); // Small delay to avoid spam
+  });
+  element.addEventListener("mouseleave", () => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    const fileTypeInfo = document.getElementById("file-type-info");
+    if (fileTypeInfo) fileTypeInfo.textContent = "";
+  });
 
   return element;
 }
@@ -663,7 +684,7 @@ function renderFiles(options = {}) {
     scheduleVisibleFolderSizes();
   }
   updateGroupHeaderStacking();
-  document.dispatchEvent(new Event("ezfm:columns-updated"));
+  document.dispatchEvent(new Event("prism:columns-updated"));
 }
 
 function renderCurrentView() {
@@ -842,7 +863,7 @@ async function openItem(item) {
 async function goBack() {
   if (historyIndex > 0) {
     historyIndex--;
-    const path = history[historyIndex];
+    const path = appHistory[historyIndex];
     const result = await window.fileManager.getDirectoryContents(path);
     if (result.success) {
       currentPath = result.path;
@@ -868,7 +889,7 @@ async function goBack() {
       if (panes[activePaneId]) {
         panes[activePaneId].path = currentPath;
         panes[activePaneId].items = currentItems;
-        panes[activePaneId].history = history;
+        panes[activePaneId].appHistory = appHistory;
         panes[activePaneId].historyIndex = historyIndex;
         panes[activePaneId].selectedItems = selectedItems;
       }
@@ -877,9 +898,9 @@ async function goBack() {
 }
 
 async function goForward() {
-  if (historyIndex < history.length - 1) {
+  if (historyIndex < appHistory.length - 1) {
     historyIndex++;
-    const path = history[historyIndex];
+    const path = appHistory[historyIndex];
     const result = await window.fileManager.getDirectoryContents(path);
     if (result.success) {
       currentPath = result.path;
@@ -905,7 +926,7 @@ async function goForward() {
       if (panes[activePaneId]) {
         panes[activePaneId].path = currentPath;
         panes[activePaneId].items = currentItems;
-        panes[activePaneId].history = history;
+        panes[activePaneId].appHistory = appHistory;
         panes[activePaneId].historyIndex = historyIndex;
         panes[activePaneId].selectedItems = selectedItems;
       }
@@ -958,7 +979,7 @@ function toggleHiddenFiles() {
   showHidden = !showHidden;
   try {
     localStorage.setItem("showHidden", String(showHidden));
-  } catch {}
+  } catch { }
   if (splitViewEnabled && !pickerMode) {
     renderAllPanes();
   } else {
@@ -1047,8 +1068,7 @@ function updateStatusBar() {
   }
 }
 
-const notificationQueue = [];
-let notificationActive = false;
+
 
 function showNextNotification() {
   if (notificationActive || notificationQueue.length === 0) return;

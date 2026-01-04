@@ -43,6 +43,34 @@ async function renderPreviewItem(item) {
     const fileType = getFileType(item);
     const ext = (item.extension || "").toLowerCase();
 
+
+    if (fileType === fileTypes.video) {
+      previewContent.innerHTML = `
+        <div class="preview-video-placeholder" style="margin-bottom: 16px; padding: 20px; text-align: center; background: var(--bg-secondary); border-radius: 8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48" style="opacity: 0.5;">
+            <polygon points="23,7 16,12 23,17 23,7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+          <p style="margin-top: 10px; color: var(--text-muted);">Double-click to open in video player</p>
+        </div>
+        <div class="preview-info">
+          <div class="preview-info-item">
+            <span class="preview-info-label">Name:</span>
+            <span class="preview-info-value">${escapeHtml(item.name)}</span>
+          </div>
+          <div class="preview-info-item">
+            <span class="preview-info-label">Size:</span>
+            <span class="preview-info-value">${formatSize(item.size || 0)}</span>
+          </div>
+          <div class="preview-info-item">
+            <span class="preview-info-label">Path:</span>
+            <span class="preview-info-value">${escapeHtml(item.path)}</span>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
     const info = await window.fileManager.getItemInfo(item.path);
     const itemInfo = info.success ? info.info : null;
 
@@ -83,7 +111,7 @@ async function renderPreviewItem(item) {
           `;
           return;
         }
-      } catch (error) {}
+      } catch (error) { }
     }
 
     if (fileType === fileTypes.image) {
@@ -98,7 +126,7 @@ async function renderPreviewItem(item) {
           const mime = dataResult.mime || "application/octet-stream";
           imageSrc = `data:${mime};base64,${dataResult.data}`;
         }
-      } catch (error) {}
+      } catch (error) { }
       if (!imageSrc) {
         imageSrc = fallbackImageUrl;
       }
@@ -110,7 +138,7 @@ async function renderPreviewItem(item) {
         if (metadataResult.success) {
           imageMetadata = metadataResult.metadata;
         }
-      } catch (error) {}
+      } catch (error) { }
 
       previewContent.innerHTML = `
         <img src="${escapeHtmlAttr(imageSrc)}" alt="${escapeHtmlAttr(item.name)}" class="preview-image" style="margin-bottom: 16px;" onerror="this.parentElement.innerHTML='<div class=\\'preview-error\\'>Failed to load image</div>'">
@@ -119,46 +147,42 @@ async function renderPreviewItem(item) {
             <span class="preview-info-label">Name:</span>
             <span class="preview-info-value">${escapeHtml(item.name)}</span>
           </div>
-          ${
-            imageMetadata
-              ? `
-          ${
-            imageMetadata.width && imageMetadata.height
-              ? `
+          ${imageMetadata
+          ? `
+          ${imageMetadata.width && imageMetadata.height
+            ? `
           <div class="preview-info-item">
             <span class="preview-info-label">Dimensions:</span>
             <span class="preview-info-value">${imageMetadata.width} × ${imageMetadata.height} px</span>
           </div>
           `
-              : ""
+            : ""
           }
           <div class="preview-info-item">
             <span class="preview-info-label">Format:</span>
             <span class="preview-info-value">${escapeHtml((imageMetadata.type || ext || "Unknown").toUpperCase())}</span>
           </div>
-          ${
-            imageMetadata.hasAlpha !== undefined
-              ? `
+          ${imageMetadata.hasAlpha !== undefined
+            ? `
           <div class="preview-info-item">
             <span class="preview-info-label">Alpha Channel:</span>
             <span class="preview-info-value">${imageMetadata.hasAlpha ? "Yes" : "No"}</span>
           </div>
           `
-              : ""
+            : ""
           }
-          ${
-            imageMetadata.orientation
-              ? `
+          ${imageMetadata.orientation
+            ? `
           <div class="preview-info-item">
             <span class="preview-info-label">Orientation:</span>
             <span class="preview-info-value">${imageMetadata.orientation}</span>
           </div>
           `
-              : ""
+            : ""
           }
           `
-              : ""
-          }
+          : ""
+        }
           <div class="preview-info-item">
             <span class="preview-info-label">File Size:</span>
             <span class="preview-info-value">${formatSize(imageMetadata?.fileSize || imageInfo.size || item.size)}</span>
@@ -176,156 +200,6 @@ async function renderPreviewItem(item) {
       return;
     }
 
-    if (fileType === fileTypes.video) {
-      const videoUrl = `file://${item.path.replace(/\\/g, "/")}`;
-      const videoInfo = itemInfo || {};
-
-      let videoMetadata = null;
-      try {
-        const metadataResult = await window.fileManager.getVideoMetadata(
-          item.path,
-        );
-        if (metadataResult.success) {
-          videoMetadata = metadataResult.metadata;
-        }
-      } catch (error) {}
-
-      const formatDuration = (seconds) => {
-        if (!seconds) return "—";
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = Math.floor(seconds % 60);
-        if (h > 0)
-          return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-        return `${m}:${s.toString().padStart(2, "0")}`;
-      };
-
-      const formatBitrate = (bps) => {
-        if (!bps) return "—";
-        if (bps < 1000) return `${bps} bps`;
-        if (bps < 1000000) return `${(bps / 1000).toFixed(1)} kbps`;
-        return `${(bps / 1000000).toFixed(2)} Mbps`;
-      };
-
-      previewContent.innerHTML = `
-        <video src="${escapeHtmlAttr(videoUrl)}" controls class="preview-video" style="margin-bottom: 16px;" onerror="this.parentElement.innerHTML='<div class=\\'preview-error\\'>Failed to load video</div>'"></video>
-        <div class="preview-info">
-          <div class="preview-info-item">
-            <span class="preview-info-label">Name:</span>
-            <span class="preview-info-value">${escapeHtml(item.name)}</span>
-          </div>
-          ${
-            videoMetadata
-              ? `
-          ${
-            videoMetadata.videoWidth && videoMetadata.videoHeight
-              ? `
-          <div class="preview-info-item">
-            <span class="preview-info-label">Resolution:</span>
-            <span class="preview-info-value">${videoMetadata.videoWidth} × ${videoMetadata.videoHeight} px</span>
-          </div>
-          `
-              : ""
-          }
-          ${
-            videoMetadata.duration
-              ? `
-          <div class="preview-info-item">
-            <span class="preview-info-label">Duration:</span>
-            <span class="preview-info-value">${formatDuration(videoMetadata.duration)}</span>
-          </div>
-          `
-              : ""
-          }
-          ${
-            videoMetadata.videoFps
-              ? `
-          <div class="preview-info-item">
-            <span class="preview-info-label">Frame Rate:</span>
-            <span class="preview-info-value">${videoMetadata.videoFps.toFixed(2)} fps</span>
-          </div>
-          `
-              : ""
-          }
-          ${
-            videoMetadata.videoCodec
-              ? `
-          <div class="preview-info-item">
-            <span class="preview-info-label">Video Codec:</span>
-            <span class="preview-info-value">${escapeHtml(videoMetadata.videoCodec.toUpperCase())}</span>
-          </div>
-          `
-              : ""
-          }
-          ${
-            videoMetadata.audioCodec
-              ? `
-          <div class="preview-info-item">
-            <span class="preview-info-label">Audio Codec:</span>
-            <span class="preview-info-value">${escapeHtml(videoMetadata.audioCodec.toUpperCase())}</span>
-          </div>
-          `
-              : ""
-          }
-          ${
-            videoMetadata.audioChannels
-              ? `
-          <div class="preview-info-item">
-            <span class="preview-info-label">Audio Channels:</span>
-            <span class="preview-info-value">${videoMetadata.audioChannels}</span>
-          </div>
-          `
-              : ""
-          }
-          ${
-            videoMetadata.audioSampleRate
-              ? `
-          <div class="preview-info-item">
-            <span class="preview-info-label">Sample Rate:</span>
-            <span class="preview-info-value">${(videoMetadata.audioSampleRate / 1000).toFixed(1)} kHz</span>
-          </div>
-          `
-              : ""
-          }
-          ${
-            videoMetadata.bitrate
-              ? `
-          <div class="preview-info-item">
-            <span class="preview-info-label">Bitrate:</span>
-            <span class="preview-info-value">${formatBitrate(videoMetadata.bitrate)}</span>
-          </div>
-          `
-              : ""
-          }
-          ${
-            videoMetadata.note
-              ? `
-          <div class="preview-info-item">
-            <span class="preview-info-label">Note:</span>
-            <span class="preview-info-value" style="font-size: 11px; color: var(--text-muted);">${escapeHtml(videoMetadata.note)}</span>
-          </div>
-          `
-              : ""
-          }
-          `
-              : ""
-          }
-          <div class="preview-info-item">
-            <span class="preview-info-label">File Size:</span>
-            <span class="preview-info-value">${formatSize(videoMetadata?.fileSize || videoInfo.size || item.size)}</span>
-          </div>
-          <div class="preview-info-item">
-            <span class="preview-info-label">Modified:</span>
-            <span class="preview-info-value">${formatDate(videoInfo.modified || item.modified)}</span>
-          </div>
-          <div class="preview-info-item">
-            <span class="preview-info-label">Path:</span>
-            <span class="preview-info-value">${escapeHtml(item.path)}</span>
-          </div>
-        </div>
-      `;
-      return;
-    }
 
     const textExtensions = [
       ".txt",
@@ -394,7 +268,7 @@ async function renderPreviewItem(item) {
           return;
         } else {
         }
-      } catch (error) {}
+      } catch (error) { }
     }
 
     if (itemInfo) {

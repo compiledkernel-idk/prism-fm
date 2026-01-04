@@ -30,6 +30,7 @@ const fileManagerApi = {
   readFilePreview: invoke("read-file-preview"),
   getImageMetadata: invoke("get-image-metadata"),
   getVideoMetadata: invoke("get-video-metadata"),
+  getFileType: invoke("get-file-type"),
 
   extractArchive: invoke("extract-archive"),
   compressItems: invoke("compress-items"),
@@ -51,7 +52,7 @@ const fileManagerApi = {
   minimizeWindow: send("window-minimize"),
   maximizeWindow: send("window-maximize"),
   closeWindow: send("window-close"),
-  
+
   pickerConfirm: send("picker-confirm"),
   pickerCancel: send("picker-cancel"),
 
