@@ -70,4 +70,4 @@ windowrulev2 = opacity 0.9 0.8,class:^(prism-fm)$
 
 ## License
 
-GPL-3.0
+GPL-3.0 (Original code by tomiwaf licensed under MIT)
