@@ -1,93 +1,56 @@
 # Prism FM
 
-A modern, transparent file manager for Linux with glassmorphism UI.
+A lightweight, transparent file manager for Linux utilizing Electron.
 
-![License](https://img.shields.io/badge/license-GPL--3.0-blue)
-![Platform](https://img.shields.io/badge/platform-Linux-lightgrey)
 ![Preview](file-manager.png)
 
 ## Features
 
-- 🎨 **Glassmorphism UI** - Beautiful transparent interface with backdrop blur
-- ⚡ **Fast & Lightweight** - Optimized Electron with GPU acceleration
-- 🖼️ **Image Previews** - Built-in image viewer with metadata
-- 📁 **Dual Pane** - Side-by-side file navigation
-- 🏷️ **File Tagging** - Color-coded organization system
-- 🔍 **Quick Search** - Find files instantly
-- 📋 **File Operations** - Copy, move, delete with undo support
-- 🗜️ **Archive Support** - Extract and compress files
-- 🎯 **XDG Portal** - System-wide file picker integration
+- **Transparent UI**: Designed for seamless integration with modern compositors (Hyprland, Sway, etc.).
+- **Dual Pane Navigation**: Efficient file management with side-by-side views.
+- **Core Operations**: Copy, move, delete, rename, and archive management.
+- **Preview System**: Integrated image and text previews.
+- **Tagging**: Essential file organization with color-coded tags.
+- **XDG Integration**: Functions as a system-wide directory picker.
 
 ## Installation
-
-### Quick Install
 
 ```bash
 git clone https://github.com/compiledkernel-idk/prism-fm.git
 cd prism-fm
-chmod +x install.sh
 ./install.sh
 ```
 
-### Dependencies
-
-- Node.js >= 18.0.0
-- npm
-- Electron
+**Dependencies:** Node.js >= 18.0.0, npm, Electron.
 
 ## Usage
 
-Run from terminal:
+Launch via terminal or application menu:
 ```bash
 prism-fm [path]
 ```
 
-Or launch from your application menu as "Prism FM".
+### Key Bindings
 
-### Keyboard Shortcuts
-
-- `Ctrl+C` - Copy
-- `Ctrl+X` - Cut
-- `Ctrl+V` - Paste
-- `Ctrl+A` - Select all
-- `Ctrl+R` - Refresh
-- `Ctrl+T` - New tab
-- `Ctrl+W` - Close tab
-- `Ctrl+L` - Focus path bar
-- `Ctrl+F` - Focus search
-- `Ctrl+H` - Toggle hidden files
-- `F2` - Rename
-- `Delete` - Move to trash
-- `Shift+Delete` - Permanent delete
+| Key | Action |
+| :--- | :--- |
+| `Ctrl+C` / `Ctrl+V` | Copy / Paste |
+| `F2` | Rename |
+| `Del` / `Shift+Del` | Trash / Permanent Delete |
+| `Ctrl+T` / `Ctrl+W` | New Tab / Close Tab |
+| `Ctrl+L` | Focus Path |
+| `Ctrl+H` | Toggle Hidden Files |
 
 ## Configuration
 
-Prism FM stores its configuration in `~/.config/prism-fm/`.
+Configuration is stored in `~/.config/prism-fm/`.
 
-### Hyprland Users
-
-For best transparency on Hyprland, add to your config:
-
-```
+**Compositor Configuration (Hyprland):**
+```ini
 layerrule = blur,class:prism-fm
 windowrulev2 = opacity 0.9 0.8,class:^(prism-fm)$
 ```
 
-## Development
-
-```bash
-# Run in development mode
-npm run dev
-
-# Start normally
-npm start
-```
-
-## Credits
-
-- Original author: tomiwaf
-- Continued development: compiledkernel-idk
-
 ## License
 
-GPL-3.0 - See [LICENSE](LICENSE) for details.
+GPL-3.0
